@@ -1,0 +1,33 @@
+plugins {
+	id 'org.springframework.boot' version '2.1.7.RELEASE'
+	id 'idea'
+	id 'java'
+}
+
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+
+group = 'com.gso.api'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '8'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 		'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 		'org.springframework.boot:spring-boot-starter-web'
+	implementation		'org.springframework.boot:spring-boot-starter-data-mongodb'
+    // lien conf / annotation
+	implementation 		'org.springframework.boot:spring-boot-autoconfigure-processor'
+	// hot reload
+	implementation		'org.springframework.boot:spring-boot-devtools'
+	implementation		'com.github.rutledgepaulv:rest-query-engine:0.7.1'
+	compileOnly 		'org.projectlombok:lombok:1.18.8'
+	annotationProcessor 'org.projectlombok:lombok:1.18.8'
+
+	testImplementation 	'org.springframework.boot:spring-boot-starter-test'
+	testImplementation	'org.junit.jupiter:junit-jupiter:5.5.2'
+}
