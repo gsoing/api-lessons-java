@@ -8,3 +8,11 @@ Les cours associés sont les suivants :
 * [v2 - CRUD](https://docs.google.com/presentation/d/1PN0lKreHxmhFqBYsikxdH4GdG58gaCthpJ7VUVBpFWE/edit?usp=sharing)
 * [v3 - Gestion des erreurs](https://docs.google.com/presentation/d/1NrYRQ4NzQiLip8oYAiSZqDaT2GAfsHwSRtBN4NVp52Y/edit?usp=sharing)
 * [v3 - Definir son plan d'URL](https://docs.google.com/presentation/d/1czfoc5Emr0WiH4mEh80IVIO6OAvCcfOuwOCkC8CZCE8/edit?usp=sharing)
+
+# TP
+Sujets et corrections des TP fait en cours.
+
+## Design d'APIs
+Le sujet est ici : [Spécifications ecommerce](https://docs.google.com/document/d/1Lel-FB2eydreYdisYS2qiz8EgX6IeI2HfSqsSe2grB0/edit?usp=sharing)
+
+Il faut partir de ce [template](https://drive.google.com/open?id=1nCCHGMRBZ2eYwBHWysG0i-BCfWH6vD00) de base.
