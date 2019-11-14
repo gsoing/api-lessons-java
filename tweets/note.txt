@@ -13,14 +13,16 @@ curl -i -X POST \
   --url http://localhost:8001/services/ \
   --data 'name=tweet' \
   --data 'url=http://tweet:8080'
+  --data 'path=/api/v1'
 
 
   curl -i -X DELETE \
     --url http://localhost:8001/services/tweet
 
-curl -i -X PUT \
+curl -i -X PATCH \
   --url http://localhost:8001/services/tweet \
   --data 'url=http://tweet:8080'
+  --data 'path=/api/v1/'
 
   curl -i -X POST \
     --url http://localhost:8001/services/tweet/routes \
@@ -33,3 +35,8 @@ curl -i -X PUT \
     curl -i -X GET \
       --url http://localhost:8000/api/v1/tweets \
       --header 'Host: example.com'
+
+# Add a
+      curl -i -X POST \
+         --url http://localhost:8001/services/tweet/plugins/ \
+         --data 'name=key-auth'

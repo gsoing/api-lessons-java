@@ -1,0 +1,499 @@
+swagger: "2.0"
+info:
+  description: "Ceci est ma super API pour remplacer Amazon"
+  version: "1.0.0"
+  title: "e-commerce API"
+host: "commerce.io"
+basePath: "/v1"
+schemes:
+- "https"
+produces:
+  - application/json
+parameters:
+  userId:
+    name: userId
+    in: path
+    type: string
+    description: indentifiant de l'utilisateur
+    required: true
+  reference:
+    name: reference
+    type: string
+    in: path
+    required: true
+    description: reference d'un article
+  page:
+    name: page
+    in: query
+    type: number
+    minimum: 0
+    required: false
+    description: la page courante à récupérer
+  pageSize:
+    name: pageSize
+    in: query
+    type: number
+    maximum: 200
+    minimum: 0
+    required: false
+    description: le nombre de résultat dans la page, le nombre max est 200
+  orderId:
+    name: orderId
+    type: string
+    in: path
+    description: identifiant de la commande
+    required: true
+paths:
+  /products:
+    get:
+      summary: liste tous les produits disponibles
+      tags:
+        - products
+      parameters:
+        - name: q
+          in: query
+          type: string
+          required: false
+          description: recherche fulltext dans le label et la description courte
+        - name: order
+          in: query
+          type: string
+          description: > 
+            ordre de tri si il n'est pas précisé c'est le tri par prix descendant
+          required: false
+          enum:
+            - ASC
+            - DESC
+        - name: category
+          in: query
+          type: string
+          enum:
+            - HIGH-TECH
+            - HOME
+            - CLOTHES
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/pageSize'
+      responses:
+        200:
+          description: > 
+            la liste des produits, 
+            si aucun produit ne correpond on retourne 200 
+            avec un tableau vide
+          schema:
+            $ref: '#/definitions/productList'
+        400:
+          description: >
+            si un des paramètres en entrée n'est pas valide, la category n'est pas dans l'enum
+            le champ order n'est pas dans l'enum
+          schema:
+            $ref: '#/definitions/error'
+  "/products/{reference}":
+    parameters: 
+      - $ref: '#/parameters/reference'
+    get:
+      summary: récupére la description de l'article
+      tags:
+        - products
+      responses:
+        200:
+          description: la description de l'article
+          schema:
+            $ref: '#/definitions/productDetails'
+        404:
+          description: "l'article n'existe pas"
+          schema:
+            $ref: '#/definitions/error'
+  "/users/{userId}/suggestions":
+    parameters:
+      - $ref: '#/parameters/userId'
+    get:
+      summary: retourne les suggestions utilisateurs
+      tags:
+        - products
+      responses:
+        200:
+          description: la liste des suggestions pour l'utilisateur
+          schema:
+            type: array
+            items: 
+              $ref: '#/definitions/productSummary'
+        204:
+          description: aucune suggestion disponible
+  "/users/{userId}/cart":
+    parameters:
+      - $ref: '#/parameters/userId'
+    get:
+      summary: récupère le panier de l'utilisateur
+      tags:
+        - carts
+      responses:
+        200: 
+          description: le panier de l'utilisateur
+          schema:
+            $ref: '#/definitions/cart'
+    post:
+      summary: ajout d'un article dans le panier
+      tags:
+        - carts
+      parameters:
+        - name: item
+          in: body
+          description: l'article à ajouter
+          required: true
+          schema:
+            type: object
+            properties:
+              quantity:
+                type: number
+                description: quantitié d'article à ajouter
+              reference:
+                type: string
+                description: reference de l'article à ajouter
+      responses:
+        200:
+          description: l'article a été correctement ajouté
+          schema:
+            $ref: '#/definitions/cart'
+        412:
+          description: la reference n'existe pas
+          schema:
+            $ref: '#/definitions/error'
+    delete:
+      summary: vide le panier
+      tags:
+        - carts
+      responses:
+        200:
+          description: le panier est vidé
+          schema:
+            $ref: '#/definitions/cart'
+        404:
+          description: l'utilisateur n'existe pas
+          schema:
+            $ref: '#/definitions/error'
+  "/users/{userId}/cart/{reference}":
+    parameters:
+      - $ref: '#/parameters/userId'
+      - $ref: '#/parameters/reference'
+    post:
+      tags:
+        - carts
+      summary: modifier la quantité d'un article dans le panier
+      parameters:
+        - name: quantity
+          in: body
+          description: nouvelle quantité
+          schema:
+            type: object
+            properties:
+              quantity:
+                type: number
+                description: nouvelle quantité
+                minimum: 0
+      responses:
+        200:
+          description: le paier est mis à jour
+          schema:
+            $ref: '#/definitions/cart'
+        404:
+          description: l'utilisateur n'existe pas ou la référence n'est pas présente dans le panier
+          schema:
+            $ref: '#/definitions/error'
+    delete:
+      summary: supprime l'article du panier 
+      tags:
+        - carts
+      responses:
+        200:
+          description: l'artice est supprimé
+          schema:
+            $ref: '#/definitions/cart'
+        404:
+          description: l'utilisateur n'existe pas ou la référence n'est pas présente dans le panier
+          schema:
+            $ref: '#/definitions/error'    
+  "/users/{userId}/orders":
+    parameters: 
+      - $ref: '#/parameters/userId'
+    get:
+      summary: récupère les commandes de l'utilisateur
+      tags: 
+        - orders
+      parameters:
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/pageSize'
+        - name: status
+          in: query
+          type: string
+          description: le statut des commandes à récupérer
+          enum:
+            - VALIDATED
+            - CANCELED
+            - FINISHED
+            - ON_GOING
+        - name: order
+          in: query
+          type: string
+          required: false
+          description: "tri des résultats, example: date;DESC ou status;ASC"
+      responses:
+        200:
+          description: la liste des commandes
+          schema:
+            $ref: '#/definitions/orderList'
+        404:
+          description: l'utilisateur n'existe pas
+          schema:
+            $ref: '#/definitions/error'
+  "/users/{userId}/orders/{orderId}":
+    parameters:
+      - $ref: '#/parameters/userId'
+      - $ref: '#/parameters/orderId'
+    get:
+      summary: récupère les détails d'une commande
+      tags: 
+        - orders
+      responses:
+        200:
+          description: le descriptif de la commande
+          schema: 
+            $ref: '#/definitions/order'
+        404:
+          description: le userId ou le orderId n'existe pas
+          schema:
+            $ref: '#/definitions/error'
+  "/users/{userId}/orders/{orderId}/status":  
+    parameters:
+      - $ref: '#/parameters/userId'
+      - $ref: '#/parameters/orderId'
+    post:
+      tags:
+        - orders
+      parameters:
+        - name: status
+          in: body
+          required: true
+          description: le nouveau status
+          schema:
+            type: object
+            description: status à mettre à jour
+            properties:
+              status:
+                $ref: '#/definitions/orderStatus'
+              reason:
+                type: string
+                description: la raison de la mise à jour
+      responses:
+        200:
+          description: le changement de statut a eu lieu
+          schema:
+            $ref: '#/definitions/order'
+        404:
+          description: l'utilisateur ou la commande n'existe pas
+          schema: 
+            $ref: '#/definitions/error'
+        403:
+          description: la transition est interdite
+          schema:
+            $ref: '#/definitions/error'
+definitions:
+  list:
+    description: object générique pour des listes
+    type: object
+    properties:
+      page: 
+        type: number
+        minimum: 0
+        description: numéro de la page courante
+      totalElements:
+        description: nombre total d'éléments 
+        type: number
+        minimum: 0
+      next: 
+        type: string
+        description: url de la prochaine page
+  productSummary:
+    type: object
+    properties:
+      reference:
+        type: string
+        description : la référence de l'objet
+      label:
+        type: string
+        description: libellé de l'objet
+      price:
+        type: number
+        format: float
+      description:
+        type: string
+        maxLength: 250
+      picture:
+        type: string
+        description: url of the picture
+  productList:
+    type: object
+    description: résultat de recherche sur les produits
+    allOf: 
+      - $ref: '#/definitions/list'
+    properties:
+      results:
+        type: array
+        items:
+          $ref: '#/definitions/productSummary'
+  productDetails:
+    type: object
+    description: "détail de l'article"
+    properties:
+      allOf: 
+        $ref: '#/definitions/productSummary'
+      detailedDescription: 
+        type: string
+        description: description complète de l'article
+      pictures:
+        description: liste de photos supplémenraires
+        type: array
+        items: 
+          type: string
+      dimensions:
+        type: object
+        description: dimension de l'objet
+        properties:
+          height:
+            type: number
+            format: float
+            description: hauteur
+          width:
+            type: number
+            format: float
+            description: largeur
+          length:
+            type: number
+            format: float
+            description: longeur
+      suggestions: 
+        description: suggestion relatives à l'article
+        type: array
+        items:
+          $ref: '#/definitions/productSummary'
+  item:
+    type: object
+    description: item ajouter à la commande ou au panier
+    properties:
+      reference: 
+        type: string
+        description: reference de l'article
+      uri:
+        type: string
+        description: url vers la fiche détail de l'article
+      label:
+        type: string
+        description: libellé de l'item
+      picture:
+        type: string
+        description: lien vers une petite photo
+      quantity:
+        type: number
+        description: quantité
+      price:
+        type: number
+        format: float
+        description: prix unitaire
+      totalPrice:
+        type: number
+        format: price
+        description: > 
+          prix total (pourrait être calculé par le front dans ce cas 
+          car on ne gère pas la tva)
+  cart:
+    type: object
+    description: panier d'achat
+    properties:
+      updated:
+        type: string
+        format: date-time
+        description: date de mise à jour du panier
+      cartId:
+        description: identifiant du panier
+        type: string
+      price:
+        description: prix total du panier
+        type: number
+        format: float
+      items:
+        description: liste des articles du panier
+        type: array
+        items:
+          $ref: '#/definitions/item'
+  error:
+    type: object
+    description: generic error
+    properties:
+      errorCode: 
+        type: string
+        description: code de l'erreur
+      errorMessage:
+        type: string
+        description: message d'erreur
+  orderStatus:
+    type: string
+    description: statut de la commande
+    enum:
+      - VALIDATED
+      - CANCELED
+      - FINISHED
+      - ON_GOING
+  order:
+    type: object
+    description: liste de commandes
+    properties:
+      created: 
+        type: string
+        format: date-time
+        description: date de création de la commande
+      updated: 
+        type: string
+        format: date-time
+        description: date de mise à jour de la commande
+      orderId:
+        type: string
+        description: identifiant de la commande
+      status:
+        $ref: '#/definitions/orderStatus'
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/item'
+      price:
+        type: number
+        format: float
+        description: prix total de la commande
+      userId:
+        type: string
+        description: identifiant du client à qui appartient la commande
+  orderSummary:
+    type: object
+    description: résumé d'une commande
+    properties:
+      orderId: 
+        type: string
+        description: identifiant de la commande
+      status:
+        $ref: '#/definitions/orderStatus'
+      price:
+        description: prix total de la commande
+        type: number
+        format: float
+      created:
+        description: date de création de la commande
+        type: string
+        format: date-time
+  orderList:
+    type: object
+    description: liste de commande
+    allOf: 
+      - $ref: '#/definitions/list'
+    properties:
+      results:
+        type: array
+        items:
+          $ref: '#/definitions/orderSummary'
