@@ -51,7 +51,7 @@ public class RestControllerAdvice extends ResponseEntityExceptionHandler  {
      * déclare une Handler spécifique pour nos exceptions fonctionnelles
      */
     @ExceptionHandler(NotFoundException.class)
-    public final ResponseEntity<Object> handleNotFoundException(NotFoundException ex, WebRequest request) throws Exception {
+    public final ResponseEntity<Object> handleNotFoundException(NotFoundException ex, WebRequest request) {
         return new ResponseEntity<>(ex.getErrorMessage(), ex.getHttpStatus());
     }
 }

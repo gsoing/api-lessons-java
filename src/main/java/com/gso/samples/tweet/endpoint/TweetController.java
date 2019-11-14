@@ -111,4 +111,9 @@ public class TweetController {
                 .eTag(updatedTweet.getEtag())
                 .body(updatedTweetDto);
     }
+
+    @ExceptionHandler()
+    public ResponseEntity<> handleException() {
+
+    }
 }
