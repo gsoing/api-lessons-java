@@ -9,5 +9,5 @@ Les cours associés sont les suivants :
 * [v3 - Gestion des erreurs](https://docs.google.com/presentation/d/1NrYRQ4NzQiLip8oYAiSZqDaT2GAfsHwSRtBN4NVp52Y/edit?usp=sharing)
 * [v3 - Definir son plan d'URL](https://docs.google.com/presentation/d/1czfoc5Emr0WiH4mEh80IVIO6OAvCcfOuwOCkC8CZCE8/edit?usp=sharing)
 
-Un exemple d'impémentation est fait ici 
-Les TP avec leur correctifs sont ici
+Un exemple d'impémentation est fait [ici](tweets)   
+Les TP avec leur correctifs sont [ici](tp)
