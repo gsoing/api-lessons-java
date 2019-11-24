@@ -1,0 +1,469 @@
+swagger: "2.0"
+info:
+  description: "Ceci est ma super API pour sauver les meubles"
+  version: "1.0.0"
+  title: "e-commerce API"
+host: "commerce.io"
+basePath: "/v1"
+schemes:
+  - "https"
+produces:
+  - application/json
+consumes: 
+  - application/json
+paths:
+  # un /suggestions ou /suggest aurait pu être plus explicite 
+  /:
+    get:
+      tags:
+      - "Products"
+      summary: "Product suggestions"
+      description: "Product suggestions"
+      produces:
+        - "application/json"
+        - "application/text"
+      responses:
+        200:
+          description: product response
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductDetailsMinimal'
+  /Products:
+    get:
+      tags:
+        - "Products"
+      summary: "Research products, can be ordered by price and filtered by category"
+      description: "Can get all products and order them by price"
+      produces:
+        - "application/json"
+      # Bien des paramètres de pagination aurait été parfait
+      parameters:
+        - name: "orderByPrice"
+          in: "query"
+          description: "order by price, 0 for no order, 1 for asc order and 2 for desc"
+          required: false
+          type: "integer"
+          format: "int32"
+        - name: "category"
+          in: "query"
+          required: false
+          type: "string"
+          enum:
+            - "MAISON"
+            - "HIGH-TECH"
+            - "VÊTEMENTS"
+      responses:
+        200:
+          description: product response
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductDetailsMinimal'
+        # ? pourquoi ?
+        201:
+          description: "ok"
+  /Products/{id}:
+    get:
+      tags:
+        - "Products"
+      summary: "Check one product"
+      description: "get one product by his id"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "id"
+          description: "id of product to fetch"
+          in: "path"
+          required: true
+          type: "integer"
+          format: "integer"
+      responses:
+        200:
+          description: product response
+          schema:
+            items:
+              $ref: '#/definitions/ProductDetails'
+        default: 
+            description: "unexpected error"
+            schema: 
+              $ref: "#/definitions/ErrorModel"
+  /{idClient}/ShoppingCart:
+    get:
+      tags:
+        - "ShoppingCart"
+      summary: "Check your shopping cart"
+      description: "check your shopping cart"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "idClient"
+          description: "id of the client"
+          in: "path"
+          required: true
+          type: "integer"
+          format: "integer"
+      responses:
+        200:
+          description: shopping cart response
+          schema:
+            items:
+              $ref: '#/definitions/ShoppingCart'
+        default: 
+            description: "unexpected error"
+            schema: 
+              $ref: "#/definitions/ErrorModel"
+    delete:
+      tags:
+        - "ShoppingCart"
+      summary: "Empty your shopping cart"
+      description: "empty your shopping cart"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "idClient"
+          description: "id of the client"
+          in: "path"
+          required: true
+          type: "integer"
+          format: "integer"
+      responses:
+        200:
+          description: shopping cart response
+          schema:
+            items:
+              $ref: '#/definitions/ShoppingCart'
+        default: 
+            description: "unexpected error"
+            schema: 
+              $ref: "#/definitions/ErrorModel"
+    # Put est une écriture, il faut donc un body
+    put:
+      tags:
+        - "ShoppingCart"
+      summary: "Validate your shopping cart"
+      description: "validate your shopping cart"
+      parameters:
+        - name: "idClient"
+          description: "id of the client"
+          in: "path"
+          required: true
+          type: "integer"
+          format: "integer"
+      responses:
+        200:
+          description: commands response
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/CommandDetailsMinimal'
+        default: 
+            description: "unexpected error"
+            schema: 
+              $ref: "#/definitions/ErrorModel"
+  /{idClient}/ShoppingCart/{idProduct}:
+    delete:
+      tags:
+        - "ShoppingCart"
+      summary: "Delete one product of your shopping cart"
+      description: "delete one product of your shopping cart"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "idClient"
+          description: "id of the client"
+          in: "path"
+          required: true
+          type: "integer"
+          format: "integer"
+        - name: "idProduct"
+          in: "path"
+          type: "integer"
+          required: true
+      responses:
+        200:
+          description: shopping cart response
+          schema:
+            items:
+              $ref: '#/definitions/ShoppingCart'
+        default: 
+            description: "unexpected error"
+            schema: 
+              $ref: "#/definitions/ErrorModel"
+    post:
+      tags:
+        - "ShoppingCart"
+      summary: "Add one product to your shopping cart"
+      description: "add one product in your shopping cart"
+      produces:
+        - "application/json"
+      # Il manque la quantité
+      parameters:
+        - name: "idClient"
+          description: "id of the client"
+          in: "path"
+          required: true
+          type: "integer"
+          format: "integer"
+        - name: "idProduct"
+          in: "path"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: shopping cart response
+          schema:
+            items:
+              $ref: '#/definitions/ShoppingCart'
+        default: 
+            description: "unexpected error"
+            schema: 
+              $ref: "#/definitions/ErrorModel"
+    # Un put est un écriture un body aurait été mieux
+    put:
+      tags:
+        - "ShoppingCart"
+      summary: "Update the quantity of one product of your shopping cart"
+      description: "update quantity of one product in your shopping cart"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "idClient"
+          description: "id of the client"
+          in: "path"
+          required: true
+          type: "integer"
+          format: "integer"
+        - name: "idProduct"
+          in: "path"
+          required: true
+          type: "integer"
+        - name: "newQuantity"
+          in: "query"
+          type: "integer"
+          required: true
+      responses:
+        200:
+          description: shopping cart response
+          schema:
+            items:
+              $ref: '#/definitions/ShoppingCart'
+        default: 
+            description: "unexpected error"
+            schema: 
+              $ref: "#/definitions/ErrorModel"
+  /{idClient}/Commands:
+    get:
+      tags:
+        - "Command"
+      summary: "Check all of your commands"
+      description: "check all your commands"
+      produces:
+        - "application/json"
+      # Manque de quoi paginer
+      parameters:
+        - name: "idClient"
+          description: "id of the client"
+          in: "path"
+          required: true
+          type: "integer"
+        - name: "orderByDate"
+          in: "query"
+          description: "order by date, 0 for no order, 1 for asc order and 2 for desc"
+          required: false
+          type: "integer"
+        - name: "orderByStatus"
+          in: "query"
+          description: "order by status, 0 for no order, 1 for asc order and 2 for desc"
+          required: false
+          type: "integer"
+        - name: "filterOnStatus"
+          in: "query"
+          required: false
+          type: "string"
+          enum:
+            - "En cours"
+            - "Validée"
+            - "Terminée"
+            - "Annulée"
+      responses:
+        200:
+          description: commands response
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/CommandDetailsMinimal'
+        default: 
+            description: "unexpected error"
+            schema: 
+              $ref: "#/definitions/ErrorModel"
+  /{idClient}/Commands/{id}:
+    # Idem un put est une écriture il lui faut un body
+    put:
+      tags:
+        - "Command"
+      summary: "Cancel one of your command"
+      description: "cancel one of your commands"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "idClient"
+          description: "id of the client"
+          in: "path"
+          required: true
+          type: "integer"
+        - name: "id"
+          description: "id of the command"
+          in: "path"
+          required: true
+          type: "integer"
+        - name: "cancellationReason"
+          description: "The reason why the command is cancelled"
+          type: "string"
+          required: true
+          in: "query"
+      responses:
+        200:
+          description: commands response
+          schema:
+            items:
+              $ref: '#/definitions/Command'
+        default: 
+            description: "unexpected error"
+            schema: 
+              $ref: "#/definitions/ErrorModel"
+definitions: 
+    ProductDetailsMinimal: 
+      type: "object"
+      required: 
+        - "id"
+      properties:
+        id: 
+          type: "integer"
+        ref: 
+          type: "string"
+        label: 
+          type: "string"
+        price: 
+          type: "integer"
+        smallDescription: 
+          type: "string"
+        image:
+          type: "object"
+    ProductDetails:
+      type: "object"
+      required: 
+        - "id"
+      properties:
+        id: 
+          type: "integer"
+        category:
+          type: "string"
+          enum:
+            - "MAISON"
+            - "HIGH-TECH"
+            - "VÊTEMENTS"
+        price:
+          type: "integer"
+        isGoodDeal:
+          type: "boolean"
+        description: 
+          type: "string"
+        picturesList: 
+          type: "array"
+          items:
+            type: "object"
+        dimension: 
+          type: "object"
+        smallDescription: 
+          type: "string"
+        similarProducts:
+          type: "array"
+          items: 
+            $ref: "#/definitions/ProductDetailsMinimal"
+    ShoppingCart: 
+      type: "object"
+      properties:
+        dateLastUpdate:
+          type: "string"
+          format: "date"
+        totalPrice:
+          type: "integer"
+        productsIn:
+          type: "array"
+          items: 
+            $ref: "#/definitions/ProductInShoppingCart"
+    ProductInShoppingCart:
+      type: "object"
+      required: 
+        - id
+      properties:
+        id:
+          type: "integer"
+        label:
+          type: "string"
+        smallPic:
+          type: "object"
+        quantity: 
+          type: "integer"
+        priceByUnit:
+          type: "integer"
+        totalPrice: 
+          type: "integer"
+    Command:
+      type: "object"
+      required: 
+        - id
+        - status
+        - creationDate
+      properties:
+        id:
+          type: "integer"
+        status:
+          type: "string"
+          enum:
+            - "En cours"
+            - "Validée"
+            - "Terminée"
+            - "Annulée"
+        cancellationReason:
+          type: "string"
+        creationDate:
+          type: "string"
+          format: "date"
+        dateLastUpdate: 
+          type: "string"
+          format: "date"
+        boughtItems: 
+          type: "array"
+          items:
+            $ref: "#/definitions/ProductInShoppingCart"
+        totalPrice:
+          type: "integer"
+    CommandDetailsMinimal:
+      type: "object"
+      required: 
+        - id
+        - status
+        - creationDate
+      properties:
+        id:
+          type: "integer"
+        status:
+          type: "string"
+        creationDate:
+          type: "string"
+          format: "date"
+        totalPrice:
+          type: "integer"
+    ErrorModel: 
+      type: "object"
+      required: 
+        - "code"
+        - "message"
+      properties: 
+        code: 
+          type: "integer"
+          format: "int32"
+        message: 
+          type: "string"

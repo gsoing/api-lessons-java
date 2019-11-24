@@ -1,0 +1,470 @@
+swagger: "2.0"
+info:
+  description: "Ceci est ma super API pour remplacer Amazon"
+  version: "1.0.0"
+  title: "e-commerce API"
+host: "commerce.io"
+basePath: "/v1"
+tags:
+  - name: "productSuggestion"
+    description: "Display product with special offers"
+  - name: "product"
+    description: "products availaible on the website"
+  - name: "cart"
+    description: "Client Cart"
+  - name: "order"
+    description: "Order client"
+schemes:
+  - "https"
+produces:
+  - application/json
+consumes: 
+  - application/json
+paths:
+  /productSuggestion:
+    get:
+      tags:
+        - "productSuggestion"
+      summary: "Find the current special offer"
+      description: ""
+      produces:
+        - "application/json"
+      parameters: 
+        - name: idClient
+          in: query
+          description : id from current client on the app
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/SpecialOffer"
+  # Les ensembles c'est avec des S
+  /product:
+    get:
+      tags:
+        - "product"
+      summary: "Find product on sale"
+      description: ""
+      produces:
+        - "application/json"
+      # Manque la pagination
+      parameters:
+        - name: reference
+          in: query
+          description: product reference
+          required: false
+          type: string
+        - name: label
+          in: query
+          description: product label
+          required: false
+          type: string
+        - name: orderByPrice
+          in: query
+          description: Sort product by price
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - DESC
+              - ASC
+        - name: category
+          in: query
+          description: Filter the product category
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - CLOTH
+              - SNEAKERS
+              - IT
+      responses:
+        200:
+          description: "successful operation"
+          # Un tableau ce serait mieux
+          schema:
+            $ref: "#/definitions/Product"
+  /product/{reference}:
+    get:
+      tags:
+        - product
+      summary: Detailled information on the product
+      description: Find additional information about the chosen product
+      produces:
+        - application/json
+      parameters:
+        - name: reference
+          in: path
+          description: product reference 
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Product"
+        404:
+          description: Product not found
+  /cart:
+    get:
+      tags:
+        - "cart"
+      summary: "Recovery the shopping cart "
+      description: ""
+      produces:
+        - "application/json"
+      parameters: 
+        - name: idClient
+          in: query
+          description : id from current client on the app
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Cart"
+    # l'ajout se fait sur /cart alors que tu déclares un /cart/items en dessous, pour être cohérent 
+    # il faut mieux faire l'ajout sur /cart/items
+    # De plus un POST sans body c'est pas forcément le mieux
+    post:
+      tags:
+        - cart
+      summary: Add product in the shopping cart
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      # Pour la cohérence il vaut mieux mettre idClient partout ou idUser
+      parameters:
+        - name: idUser
+          in: query
+          description: Id from the current user
+          required: true
+          type: integer
+        - name: reference
+          in: query
+          description: reference de l'article
+          required: true
+          type: string
+        - name: quantite
+          in: query
+          description: quantité ajoutée
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: "successful operation"
+          schema:
+            $ref: '#/definitions/CartItem'
+        '400':
+          description: Invalid Item
+  /cart/items/{reference}:
+    delete:
+      tags:
+        - cart
+      summary: Delete a product in the shopping cart
+      produces:
+        - application/json
+      parameters:
+        - name: reference
+          in: path
+          description: Reference to the deleted product
+          required: true
+          type: integer
+        - name: idUser
+          in: query
+          description: Id from the current user
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "successful operation"
+        404:
+          description: "Product not find"
+    # Un PUT est une écriture, tu ne mets aucun body donc ca revient à vider ton item
+    # le mieux ca aurait été /cart/item/reference/quantity avec un body
+    put:
+      tags:
+        - cart
+      summary: Modify the product quantity
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: reference
+          in: path
+          description: Reference to the modify item or product
+          required: true
+          type: integer
+        - name: quantite
+          in: query
+          description: Modify a quantity
+          required: true
+          type: integer
+        - name: idUser
+          in: query
+          description: Id from the current user
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "successful operation"
+        404:
+          description: "Product not find"
+  # Argh pkoi ? DELETE /cart c'est bien aussi ou DELETE /cart/item
+  /cart/emptyCart:
+    get:
+      tags:
+      - "cart"
+      summary: "Empty shopping cart"
+      description: ""
+      produces:
+      - "application/json"
+      parameters:
+        - name: idUser
+          in: query
+          description: Id from the current user
+          required: true
+          type: integer
+      responses:
+        # Si pas de body 204 c'est mieux
+        200:
+          description: "Opération réalisée avec succès"
+  /order:
+    get:
+      tags:
+      - "order"
+      summary: "Recovery the client order"
+      description: ""
+      produces:
+      - "application/json"
+      # Manque la pagination
+      parameters:
+        - name: idUser
+          in: query
+          description: Id from the current user
+          required: true
+          type: integer
+        - name: statutFilter
+          in: query
+          description: Sort on the status order
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - En cours
+              - Validée
+              - Terminée
+              - Annulée
+        - name: orderByStatut
+          in: query
+          description: Order the selection by status order
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: orderByDate
+          in: query
+          description: Order the selection by date
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - ASC
+              - DESC
+      responses:
+        # Un tableau aurait été mieux
+        200:
+          description: "succesfull operation"
+          schema:
+            $ref: "#/definitions/OrderInvoice"
+  /order/{idOrder}:
+    # Pareil un put c'est une écriture il faut un body
+    put:
+      tags:
+        - order
+      summary: Cancel an Order
+      description: 'Only the order with the status IN PROGRESS can be canceled'
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: idOrder
+          in: path
+          description: idOrder from the cancel order
+          required: true
+          type: integer
+        - name: idUser
+          in: query
+          description: Id from the current user
+          required: true
+          type: integer
+        - name: reason
+          in: query
+          description: reason for cancelling
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Opération réalisée avec succès"
+  /order/{idOrder}/invoice:
+    get:
+      tags:
+        - order
+      summary: Invoice from the order
+      description: Create the invoice from the select order
+      produces:
+        - application/json
+      parameters:
+        - name: idOrder
+          in: path
+          description: id order
+          required: true
+          type: integer
+          format: int64
+        - name: idUser
+          in: query
+          description: Id from the current user
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Order"
+        404:
+          description: "Order not find"
+          
+definitions:
+    Product:
+      type: "object"
+      properties:
+        reference:
+          type: "string"
+        label:
+          type: "string"
+        price:
+          type: "number"
+        description:
+          type: "string"
+        picture:
+          type: "string"
+        category:
+          type: string
+          enum:
+            - CLOTH
+            - SNEAKERS
+            - IT
+    SpecialOffer:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        endDate:
+          type: "string"
+        products:
+          type: "array"
+          items:
+            $ref: '#/definitions/Product'
+    Detail:
+      type: "object"
+      properties:
+        product:
+          $ref: "#/definitions/Product"
+        description:
+          type: "string"
+        picture:
+          type: "array"
+          items:
+            type: "string"  
+        dimension:
+          type: "string"
+        similarProduct:
+          type: "array"
+          items:
+            $ref: '#/definitions/Product'
+    Cart:
+      type: "object"
+      properties:
+        lastUpdate:
+          type: "string"
+        listeItems:
+          type: "array"
+          items:
+            $ref: '#/definitions/CartItem'
+        totalPrice:
+          type: "number"
+    CartItem:
+      type: "object"
+      properties:
+        reference:
+          type: "string"
+        label:
+          type: "string"
+        littlePicture:
+          type: "string"
+        quantity:
+          type: "integer"
+        unitCost: 
+          type: "number"
+        totalCost:
+          type: "number"
+          
+    Order:
+      type: "object"
+      properties:
+        idOrder:
+          type: "integer"
+        idClient:
+          type: "integer"
+        statut:
+          type: string
+          enum:
+          - "IN PROGRESS"
+          - "VALIDATED"
+          - "FINISHED"
+          - "CANCELLED"
+        createDate:
+          type : "string"
+        updateDate:
+          type: "string"
+        itemList:
+          type: array
+          items:
+            $ref: '#/definitions/CartItem'
+        prixTotal:
+          type: "number"
+          
+    OrderInvoice:
+      type: "object"
+      properties:
+        idCOrder:
+          type: "integer"
+        createDate:
+          type : "string"
+        statut:
+          type: string
+          enum:
+          - "IN PROGRESS"
+          - "VALIDATED"
+          - "FINISHED"
+          - "CANCELLED"
+        totalPrice:
+          type: "number"
+      
+          

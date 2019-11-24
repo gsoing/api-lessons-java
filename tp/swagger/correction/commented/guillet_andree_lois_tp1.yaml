@@ -1,0 +1,377 @@
+swagger: "2.0"
+info:
+  description: "Swagger pour TP noté"
+  version: "1.0.0"
+  title: "e-commerce API"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "lois.guillet@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "localhost:8080"
+basePath: "/api/v1/"
+tags:
+  - name: "articles"
+    description: "Everything about your articles"
+  - name: "basket"
+    description: "Operations about basket"
+  - name: "order"
+    description: "Everything about your orders"
+produces:
+  - application/json
+consumes: 
+  - application/json
+schemes:
+  - "https"
+paths:
+  "/articles/goodplan":
+    get:
+      tags : 
+        - "articles"
+      summary: "get suggestions of e-commerce"
+      description: "this list can be empty"
+      responses:
+        200:
+          description: OK
+          schema: 
+            type: array
+            items:
+              $ref: "#/definitions/article"
+  "/articles":
+    get:
+      tags:
+        - "articles"
+      summary: "find articles on sales"
+      # Manque la pagination
+      parameters:
+        - name: reference
+          in: query
+          description: Reference de l'article
+          required: false
+          type: string
+        - name: label
+          in: query
+          description: Libellé de l'article
+          required: false
+          type: string
+        - name: orderByPrice
+          in: query
+          description: sort by price article
+          required: false
+          type: array
+          items:
+            type: "string"
+            enum:
+              - ASC
+              - DESC
+        - name: category
+          in: query
+          description: filter by category
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - HIGH-TECH
+              - MAISON
+              - VÊTEMENTS
+      responses:
+        200:
+          description: OK
+          schema: 
+            type: array
+            items:
+              $ref: "#/definitions/article"
+  "/articles/{id}":
+    get:
+      tags:
+        - "articles"
+      summary: "get detail of ONE article"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of article to return"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        # Un 404 aurait été bien
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/article"
+  "/basket":
+    get:
+      tags: 
+        - "basket"
+      summary: "Get basket of a customer"
+      description: "can be empty"
+      parameters:
+        - name: customerId
+          in: query
+          type: number
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/basket"
+  "/basket/validate/{id}":
+    get:
+      tags:
+        - "basket"
+      summary : "Validate a Basket of a customer"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of the customer who want to validate"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        # Il aurait été bien de retourner la commande
+        200:
+          description: OK
+  # On est ici sur une opération pas une lecture
+  # DELETE /basket/{id} est mieux
+  "/basket/drop/{id}":
+    get:
+      tags:
+        - "basket"
+      summary : "drop a Basket of a customer"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "ID of the customer who want to drop the basket"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: OK
+  # Je ne comprends pas le sens de cette url
+  # Si id est l'identifiant de l'utilisateur
+  # il aurait mieux valu /basket/{id}/items
+  "/basket/items/{id}":
+    #delete ne prend pas de body
+    delete:
+      tags: 
+        - "basket"
+      summary: "remove an article from basket"
+      description: "get basket of a customer"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: number
+        - name: articleToDelete
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/articleTo"
+      responses:
+        200:
+          description: OK
+    # Un PUT écrase la ressource, ici on ajoute
+    # POST est plus pertinent
+    put:
+      tags: 
+        - "basket"
+      summary: "modify quantity of a product in basket"
+      description: "work only if the order is in In-progress"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: number
+        - name: articleToModify
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/articleTo"
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/basket"
+  # la on a perdu l'id utilisateur
+  "/basket/items/":      
+    post:
+      tags: 
+        - "basket"
+      summary: "Add an article to basket"
+      description: ""
+      parameters:
+        - name: articleToAdd
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/articleTo"
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/basket"
+  "/orders":
+    get: 
+      tags: 
+        - "order"
+      summary : "get orders of customer"
+      parameters:
+        # Manque la pagination
+        - name: "id"
+          in: "query"
+          description: "ID of the customer who want to get orders"
+          required: false
+          type: "integer"
+          format: "int64"
+        - name: "filterByStatus"
+          in: query
+          description: "filter by status"
+          type: "string"
+          enum:
+            - "Validated"
+            - "Completed"
+            - "Canceled"
+            - "In-progress"
+        - name : "orderBy"
+          in: query
+          description : "Order by status or date"
+          type: "string"
+          enum:
+            - "Status"
+            - "Date"
+        - name: "orderDesc"
+          in: query
+          description: "DESC order ?"
+          type: "string"
+          enum:
+            - "TRUE"
+            - "FALSE"
+      responses:
+        200:
+          description: OK
+    # si on fait ca sur /order on écrase l'ensemble des commandes
+    # un POST est plus adapté, voir un DELETE /orders/{id}
+    put:
+      tags:
+        - "order"
+      summary: "cancel order"
+      parameters:
+      - name: "object"
+        in: "body"
+        schema:
+          $ref: "#/definitions/cancel-order"
+      responses:
+        200:
+          description: OK
+  # la facture c'est invoice :D
+  "/orders/{id}/bill":
+    get: 
+      tags: 
+        - "order"
+      summary : "get bill of order"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: number
+      responses:
+        # Un 404 aussi
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/order"
+definitions:
+  article:
+    type: "object"
+    properties:
+      reference:
+        type: "number"
+      label:
+        type: "string"
+      price:
+        type: "number"
+      description:
+        type: "string"
+      small-description:
+        type: "string"
+      category:
+        $ref: '#/definitions/category'
+      image:
+        type: "string"
+  category:
+    type: "string"
+    enum:
+      - HIGH-TECH
+      - MAISON
+      - VÊTEMENTS
+  basket:
+    type: "object"
+    properties:
+      lastUpdate:
+        type: "string"
+        format : "date"
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/BasketItem'
+      totalPrice:
+        type: "number"
+  BasketItem:
+    type: "object"
+    properties:
+      reference:
+        type: "string"
+      label:
+        type: "string"
+      thumbnail:
+        type: "string"
+      unit-price:
+        type: "number"
+      total-price:
+        type: "number"
+      quatity:
+        type: "integer"
+  articleTo:
+    type: "object"
+    properties:
+      customerId:
+        type: "number"
+      articleId:
+        type: "number"
+      quantity:
+        type: "number"
+  order:
+    type: "object"
+    properties:
+      customerId:
+        type: "number"
+      lastUpdate:
+        type: "string"
+        format : "date"
+      created:
+        type: "string"
+        format: "date"
+      items:
+        type: "array"
+        items:
+          $ref: '#/definitions/BasketItem'
+      total-price:
+        type: "number"
+      order-status:
+        $ref: '#/definitions/order-status'
+  order-status:
+    type: "string"
+    enum:
+      - "Validated"
+      - "Completed"
+      - "Canceled"
+      - "In-progress"
+  cancel-order:
+    type: "object"
+    properties:
+      orderId:
+        type: "number"
+      motif:
+        type: "string"

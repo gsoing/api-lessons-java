@@ -1,0 +1,456 @@
+swagger: "2.0"
+info:
+  description: "Ceci est ma super API pour remplacer Amazon"
+  version: "1.0.0"
+  title: "e-commerce API"
+host: "commerce.io"
+basePath: "/v1"
+tags:
+- name: "suggestions"
+  description: "Suggestions d'articles en promotions"
+- name: "articles"
+  description: "Articles disponibles sur le site de e-commerce"
+- name: "panier"
+  description: "Panier du client"
+- name: "commandes"
+  description: "commandes du client"
+schemes:
+- "https"
+produces:
+  - application/json
+consumes: 
+  - application/json
+paths:
+  /suggestions:
+    get:
+      tags:
+      - "suggestions"
+      summary: "Récupération des différentes promotions en cours"
+      description: ""
+      produces:
+      - "application/json"
+      parameters:
+        - name: idUser
+          in: query
+          description: id de l'utilisateur
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Opération réalisée avec succès"
+          schema:
+            $ref: "#/definitions/BonPlan"
+  /articles:
+    get:
+      tags:
+      - "articles"
+      summary: "Rechercher des articles"
+      description: ""
+      produces:
+      - "application/json"
+      parameters:
+        - name: reference
+          in: query
+          description: Reference de l'article
+          required: false
+          type: string
+        - name: label
+          in: query
+          description: Libellé de l'article
+          required: false
+          type: string
+        - name: orderByPrice
+          in: query
+          description: Tri des prix des articles
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - DESC
+              - ASC
+        - name: category
+          in: query
+          description: Filtre de la categorie des produits
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - HIGH-TECH
+              - MAISON
+              - VÊTEMENTS
+      responses:
+        200:
+          description: "Opération réalisée avec succès"
+          schema:
+            $ref: "#/definitions/Article"
+  /artilces/{reference}:
+    get:
+      tags:
+        - articles
+      summary: Information détaillée de l'article
+      description: Retourne des informations supplémentaires sur l'article choisi
+      produces:
+        - application/json
+      parameters:
+        - name: reference
+          in: path
+          description: reference de l'article
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: "Opération réalisée avec succès"
+          schema:
+            $ref: "#/definitions/Detail"
+        404:
+          description: "Article not found"
+  /panier/items:
+    get:
+      tags:
+      - "panier"
+      summary: "Récupérer les articles du panier"
+      description: ""
+      produces:
+      - "application/json"
+      parameters:
+        - name: idUser
+          in: query
+          description: id de l'utilisateur
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Opération réalisée avec succès"
+          schema:
+            $ref: "#/definitions/Panier"
+    post:
+      tags:
+        - panier
+      summary: Ajouter un article au panier
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: idUser
+          in: query
+          description: id de l'utilisateur
+          required: true
+          type: integer
+        - name: reference
+          in: query
+          description: reference de l'article
+          required: true
+          type: string
+        - name: quantite
+          in: query
+          description: quantité ajoutée
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: "Opération réalisée avec succès"
+          schema:
+            $ref: '#/definitions/ItemPanier'
+        '400':
+          description: Invalid Item
+  /panier/items/{reference}:
+    delete:
+      tags:
+        - panier
+      summary: Supprimer un article du panier
+      produces:
+        - application/json
+      parameters:
+        - name: reference
+          in: path
+          description: Référence de l'article à supprimer
+          required: true
+          type: integer
+        - name: idUser
+          in: query
+          description: id de l'utilisateur
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Opération réalisée avec succès"
+        404:
+          description: "Article non trouvé"
+    put:
+      tags:
+        - panier
+      summary: Modifier la quantité
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: reference
+          in: path
+          description: Référence de l'item à modifier
+          required: true
+          type: integer
+        - name: quantite
+          in: query
+          description: Quantité à modifier
+          required: true
+          type: integer
+        - name: idUser
+          in: query
+          description: id de l'utilisateur
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Opération réalisée avec succès"
+        404:
+          description: "Article non trouvé"
+  /panier/vider:
+    get:
+      tags:
+      - "panier"
+      summary: "Vider le panier"
+      description: ""
+      produces:
+      - "application/json"
+      parameters:
+        - name: idUser
+          in: query
+          description: Id de l'utilisateur
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Opération réalisée avec succès"
+  /commandes:
+    get:
+      tags:
+      - "commandes"
+      summary: "Récupération des commandes du client"
+      description: ""
+      produces:
+      - "application/json"
+      parameters:
+        - name: idUser
+          in: query
+          description: Id de l'utilisateur
+          required: true
+          type: integer
+        - name: statutFilter
+          in: query
+          description: Filtre sur le statut des commandes
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - En cours
+              - Validée
+              - Terminée
+              - Annulée
+        - name: orderByStatut
+          in: query
+          description: Ordre par le statut des commandes
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: orderByDate
+          in: query
+          description: Ordre par date des commandes
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        
+      responses:
+        200:
+          description: "Opération réalisée avec succès"
+          schema:
+            $ref: "#/definitions/CommandeResume"
+  /commandes/{idCommande}:
+    put:
+      tags:
+        - commandes
+      summary: Annuler une commande
+      description: 'Seules les commandes En Cours peuvent être annulées'
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: idCommande
+          in: path
+          description: id de la commande à annuler
+          required: true
+          type: integer
+        - name: idUser
+          in: query
+          description: Id de l'utilisateur
+          required: true
+          type: integer
+        - name: motif
+          in: query
+          description: motif d'annulation
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Opération réalisée avec succès"
+  /commandes/{idCommande}/facture:
+    get:
+      tags:
+        - commandes
+      summary: Facture d'une commande
+      description: Génération de la facture d'une commande
+      produces:
+        - application/json
+      parameters:
+        - name: idCommande
+          in: path
+          description: id de la commande
+          required: true
+          type: integer
+          format: int64
+        - name: idUser
+          in: query
+          description: Id de l'utilisateur
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Opération réalisée avec succès"
+          schema:
+            $ref: "#/definitions/Commande"
+        404:
+          description: "Commande non trouvée"
+          
+definitions:
+
+  Article:
+    type: "object"
+    properties:
+      reference:
+        type: "string"
+      label:
+        type: "string"
+      prix:
+        type: "number"
+      description:
+        type: "string"
+      image:
+        type: "string"
+      category:
+        type: string
+        enum:
+          - HIGH-TECH
+          - MAISON
+          - VÊTEMENTS
+  BonPlan:
+    type: "object"
+    properties:
+      nom:
+        type: "string"
+      dateFim:
+        type: "string"
+      articles:
+        type: array
+        items:
+          $ref: '#/definitions/Article'
+  Detail:
+    type: "object"
+    properties:
+      article:
+        $ref: "#/definitions/Article"
+      longDescription:
+        type: "string"
+      photos:
+        type: array
+        items:
+          type: string  
+      dimension:
+        type: "string"
+      articlesSimilaires:
+        type: array
+        items:
+          $ref: '#/definitions/Article'
+  Panier:
+    type: "object"
+    properties:
+      lastUpdate:
+        type: "string"
+      listeItems:
+        type: array
+        items:
+          $ref: '#/definitions/ItemPanier'
+      prixTotal:
+        type: "number"
+  ItemPanier:
+    type: "object"
+    properties:
+      reference:
+        type: "string"
+      label:
+        type: "string"
+      petitePhoto:
+        type: "string"
+      quantite:
+        type: "integer"
+      coutUnitaire:
+        type : "integer"
+      coutTotal:
+        type : "integer"
+  Commande:
+    type: "object"
+    properties:
+      idCommande:
+        type: "integer"
+      idClient:
+        type: "integer"
+      statut:
+        type: string
+        enum:
+          - En cours
+          - Validée
+          - Terminée
+          - Annulée
+      dateCreation:
+        type : "string"
+      dateUpdate:
+        type: "string"
+      listeItems:
+        type: array
+        items:
+          $ref: '#/definitions/ItemPanier'
+      prixTotal:
+        type: "number"
+  CommandeResume:
+    type: "object"
+    properties:
+      idCommande:
+        type: "integer"
+      dateCreation:
+        type : "string"
+      statut:
+        type: string
+        enum:
+          - En cours
+          - Validée
+          - Terminée
+          - Annulée
+      prixTotal:
+        type: "number"
+    
+        

@@ -1,0 +1,278 @@
+swagger: "2.0"
+info:
+  description: "Ceci est ma super API pour remplacer Amazon"
+  version: "1.0.0"
+  title: "e-commerce API"
+host: "commerce.io"
+basePath: "/v1"
+schemes:
+  - "https"
+produces:
+  - application/json
+consumes: 
+  - application/json
+## Afficahge des produits  
+paths:
+  # Pas très explicite comme ressource
+  /:
+    get:
+      tags:
+        - "Customer"
+      summary: "Accueil bons plans"
+      description: "Affiche bons plans"
+      parameters:
+        - in: path
+          name: iduser
+          type: integer
+          required: true
+          description: "Considèrons que user est déjà connecté"
+      responses:
+        200:
+          description: "successful"
+  # Pareil on ne sait pas ce qu'on manipule comme ressource
+  # de plus on ne met pas de verbe dans les URL
+  /findandsort:
+    get:
+      tags:
+        - "Product"
+      summary: "recherche des articles et également pouvoir trier par prix"
+      description: "rechercher et trier"
+      operationId: "findproducts"
+      # Manque les paramètres de pagination
+      parameters:
+        - in: query
+          name: productname
+          type: string
+          description: "rechercher par nom"
+        - in: query
+          name: sort
+          type: integer
+          minimum: 0
+          maximum: 1
+          description: "trier par prix (0 croissant/1 décroissant)"  
+      responses:
+        200:
+          description: "successful"
+  # Peut-être fusionné avec la recherche en ajoutant le queryParam category
+  /products/{category}: 
+    get:
+      tags:
+        - "Product"
+      summary: "Résultats par catégories"
+      description: "Affiche résultat par catégories"
+      # Pas de pagination 
+      parameters:
+        - in: path
+          name: category
+          type: integer
+          required: true
+      # 404 ou 400 si la catégorie n'est pas bonne ou n'existe pas 
+      responses:
+        200:
+          description: "ok" 
+  /products/{id}/detail:
+    get:
+      tags:
+        - "Product"
+      summary: "Détails produit"
+      description: "Affiche détails produit"
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          required: true
+      # 404 si le produit n'existe pas ?
+      responses:
+        200:
+          description: "successful"
+## Gestion du Panier
+  /shoppingcart:
+    post:
+      tags:
+        - "ShoppingCart"
+      summary: "Ajout dans le panier"
+      description: "Considérons que le user est déjà connecter. On sait que chaque user à un panier" 
+      parameters:
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/ProductinCart"
+      responses:
+        200:
+          description: "successful"
+    delete:
+      tags: 
+        - "ShoppingCart"
+      summary: "Supprimer du panier"
+      description: "Considérons que le user est déjà connecter. On sait que chaque user à un panier"
+      parameters:
+        # Je vais considérer qu'ici id est l'id produit même si ce n'est pas explicité
+        # sinon je ne vois pas comment tu supprimes un article unique du panie
+        - in: query
+          name: id
+          type: integer
+          required: true
+      responses:
+        200:
+          description: "successful"  
+    # Un put doit avoir un BODY
+    put:
+      tags: 
+        - "ShoppingCart"
+      summary: "Modifier du panier"
+      description: "Considérons que le user est déjà connecter. On sait que chaque user à un panier"
+      parameters:
+        # Je vais considérer qu'ici id est l'id produit même si ce n'est pas explicité
+        - in: query
+          name: id
+          type: integer
+          required: true
+        - in: query
+          name: quantity
+          type: integer
+          minimum: 1
+          required: true
+      responses:
+        200:
+          description: "successful"
+  # Le verbe DELETE suffit pas besoin de mettre clean dans l'url ?
+  /shoppingcart/clean:
+    delete:
+      tags: 
+        - "ShoppingCart"
+      summary: "Vider du panier"
+      description: "Considérons que le user est déjà connecter. On sait que chaque user à un panier"
+      # Pourquoi un iduser ici alors qu'on ne s'en sert nul part ailleurs ?
+      parameters:
+        - in: query
+          name: iduser
+          type: integer
+          required: true
+      responses:
+        200:
+          description: "successful"  
+# Manque toute la partie sur les commandes
+definitions:
+  Product:
+    type: object
+    properties:
+      ref:
+        type: integer
+      productname:
+        type: string
+      price:
+        type: number
+        format: double
+      description:
+        type: string
+      picture:
+        type: string
+      dimension:
+        type: string  
+      category:
+        $ref: "#/definitions/Category"  
+    required:
+      - ref
+      - productname
+      - price
+      - picture
+      - category
+  Category:
+    type: object
+    properties:
+      idcategory:
+        type: integer
+      categoryname:
+        type: string
+    required: 
+    - idcategory
+    - categoryname
+  Customer:
+    type: object
+    properties:
+      idcustomer:
+        type: integer
+      fname:
+        type: string
+      lname:
+        type: string  
+      adress:
+        type: string
+      email:
+        type: string    
+      phone:
+        type: string     
+    required: 
+    - idcustomer
+    - fname
+    - lname  
+    - adress  
+    - email  
+  Shoppingcart:
+    type: object
+    properties:  
+      idshoppingcart:
+        type: integer
+      date:
+        type: string
+        format: date
+      shippingdate:
+        type: string 
+        format: date
+      products:
+        type: array
+        items:
+          $ref: "#/definitions/ProductinCart" 
+      cost:
+        type: number
+        format: double
+    required: 
+    - idshoppingcart
+    - date
+    - shippingdate
+    - products  
+    - cost
+  ProductinCart:
+    type: object
+    properties:  
+      id:
+        type: integer
+      name:
+        type: string
+      picture:
+        type: string
+      quantity: 
+        type: string
+      unitcost:
+        type: integer
+      totalcoas:
+        type: number
+        format: double
+  Order:
+    type: object
+    properties:  
+      id:
+        type: integer
+      status:
+        type: string
+        enum:
+          - En cours
+          - Validée
+          - Terminée
+          - Annulée
+      date:
+        type: string
+        format: date
+      update:
+        type: string
+        format: date
+      customer:
+        $ref: "#/definitions/Customer" 
+      totalcost:
+        type: number
+        format: double
+      products:
+        type: array
+        items:
+          $ref: "#/definitions/ProductinCart"   

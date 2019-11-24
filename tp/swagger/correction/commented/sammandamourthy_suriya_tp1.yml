@@ -1,0 +1,431 @@
+swagger: "2.0"
+info:
+  description: "Ceci est ma super API pour remplacer Amazon"
+  version: "1.0.0"
+  title: "e-commerce API"
+host: "commerce.io"
+basePath: "/v1"
+schemes:
+  - "https"
+produces:
+  - application/json
+consumes: 
+  - application/json
+paths:
+  # Je ne comprends pas très bien le sens de l'url
+  # customer suggestions est suffisant
+  # sinon on fait /customers/{idCustomer}/suggestions
+  /customer/suggestions/{idCustomer}:
+    get:
+      tags:
+        - "Affichage des produits"
+      summary: "Find suggestions list about one customer"
+      description: "On indique l'id du client pour afficher les suggestions"
+      produces:
+        - "application/json"
+        - "application/xml"
+      parameters:
+        - name: "idCustomer"
+          in: "path"
+          description: "ID of client to return"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        200:
+          description: "successful operation"
+          # Je pense qu'il y a un pb dans l'objet
+          schema:
+            $ref: "#/definitions/Suggestion"
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Suggestion not found"
+  # On ne peut pas dire dans quel sens on trie
+  # un queryParam aurait été plus adapté
+  /search/articles/{articleName}/orderBy/price:
+    get:
+      tags:
+        - "Affichage des produits"
+      summary: "Display list products search by the customer"
+      description: "On indique le nom de l'article"
+      produces:
+        - "application/json"
+        - "application/xml"
+      # Manque la pagination
+      parameters:
+        - name: "articleName"
+          in: "path"
+          description: "articleName of client to return"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          # Un tableau aurait été plus adpaté
+          schema:
+            $ref: "#/definitions/Article"
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Articles not found"
+  # tu aurais pu fusionner les 2 URL avec des queryParams
+  /articles/findByCategory:
+    get:
+      tags:
+        - "Affichage des produits"
+      summary: "Finds articles by category name"
+      description: "Donner la catégorie"
+      operationId: "findByArticle"
+      produces:
+        - "application/xml"
+        - "application/json"
+      parameters:
+        - name: "findByCategory"
+          in: "query"
+          description: "Status values that need to be considered for filter"
+          required: true
+          type: "array"
+          items:
+            type: "string"
+            enum:
+            - "HIGH-TECH"
+            - "MAISON"
+            - "VÊTEMENTS"
+            default: "available"
+          collectionFormat: "multi"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Category"
+        400:
+          description: "Invalid status value"
+  /articles/{idArticle}/detail:
+    get:
+      tags:
+        - "Affichage des produits"
+      summary: "Find detail article by ID article"
+      description: "Returns a detail article"
+      produces:
+        - "application/xml"
+        - "application/json"
+      parameters:
+        - name: "idArticle"
+          in: "path"
+          description: "ID of detail article to return"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        200:
+          description: "successful operation"
+          # Manque tous les attributs de la liste
+          schema:
+            $ref: "#/definitions/DetailArticle"
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Article detail not found"
+  /basket:
+    get:
+      tags:
+        - "Panier"
+      summary: "Show state basket"
+      description: "Show state basket"
+      produces:
+        - "application/xml"
+        - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Basket"
+        # On ne passe pas d'id
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Article detail not found"
+    post:
+      tags:
+        - "Panier"
+      summary: "Add a new article to the basket"
+      description: ""
+      consumes:
+        - "application/json"
+        - "application/xml"
+      produces:
+        - "application/xml"
+        - "application/json"
+      # Manque la quantité et un objet plus simple aurait été mieux
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Article object that needs to be added to the basket"
+          required: true
+          schema:
+            $ref: "#/definitions/Article"
+      responses:
+        405:
+          description: "Invalid input"
+  /basket/{idArticle}:
+    delete:
+      tags:
+        - "Panier"
+      summary: "Deletes an article in the basket"
+      description: ""
+      produces:
+        - "application/xml"
+        - "application/json"
+      parameters:
+        # On n'a pas d'apikey
+        - name: "api_key"
+          in: "header"
+          required: false
+          type: "string"
+        - name: "idArticle"
+          in: "path"
+          description: "Article id to delete in the basket"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Pet not found"
+  # Heu tu voulais dire basket ?
+  /article/{idArticle}/quantity/{quantity}:
+    # Put doit avoir un body donc la quantité est à passer dans le body
+    put:
+      tags:
+        - "Panier"
+      summary: "update article quantity"
+      description: "On modifie la quantité de l'article dont on a l'id"
+      operationId: "updateQuantity"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "idArticle"
+          in: "path"
+          required: true
+          type: "integer"
+        - in: "path"
+          name: "quantity"
+          description: "la nouvelle quantitée"
+          required: true
+          type: "integer"
+      responses:
+        400:
+          description: "Invalid user supplied"
+        404:
+          description: "User not found"
+  # Pourquoi delete dans cette URL ? tu as déjà le verbe DELETE
+  /delete/basket:
+    delete:
+      tags:
+        - "Panier"
+      summary: "Empty basket"
+      description: ""
+      produces:
+        - "application/xml"
+        - "application/json"
+      responses:
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Basket not found"
+  # ici l'url est plus cohérente que pour /products
+  /order:
+    get:
+      tags:
+        - "Commande"
+      summary: "return all orders"
+      description: "retourne toutes les commandes qu'on peut filtrer grace à l'enum qu'on a fait précédemment"
+      operationId: "getOrders"
+      produces:
+        - "application/json"
+      # Manque la pagination
+      parameters:
+        - name: "status"
+          in: "query"
+          description: "satut de la commande"
+          required: true
+          type: "array"
+          items:
+            type: "string"
+            enum:
+            - "En cours"
+            - "Validée"
+            - "Terminée"
+            - "Annulée"
+            default: "available"
+        - name: "sorted-by-date"
+          in: "query"
+          description: "le tri par date"
+          required: false
+          type: "string"
+        - name: "sorted-by-status"
+          in: "query"
+          description: "le tri par statut"
+          required: false
+          type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          # Par contre une commande c'est plus qu'une liste d'articles
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Article"
+        400:
+          description: "Invalid status value"
+  /order/{id}:
+    get:
+      tags:
+        - "Commande"
+      summary: "return bill order"
+      description: "retourne la facture d'une commande en fonction de l'id"
+      operationId: "getBillOrder"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "id"
+          required: true
+          in: "path"
+          description: "id de la commande dont on retourne la facture"
+          type: "integer"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/OrderBill"
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Bill not found"
+definitions:
+  Article:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      referenceArticle:
+        type: "string"
+      libelle:
+        type: "string"
+      price:
+        type: "integer"
+      description:
+        type: "string"
+      image:
+        type: "object"
+        xml:
+          name: "imageUrl"
+          wrapped: true
+        items:
+          type: "string"
+      category:
+        $ref: "#/definitions/Category"
+      detail:
+        $ref: "#/definitions/DetailArticle"
+    xml:
+      name: "Article"
+  DetailArticle:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      description:
+        type: "string"
+      listImages:
+        type: "array"
+        xml:
+          name: "photoUrl"
+          wrapped: true
+        items:
+          type: "string"
+      height:
+        type: "integer"
+        format: "int64"
+      width:
+        type: "integer"
+        format: "int64"
+    xml:
+      name: "Category"
+  # Une suggestion n'est pas un client mais un produit
+  Suggestion:
+    type: "object"
+    properties:
+      client:
+        $ref: "#/definitions/Customer"
+  Customer:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      username:
+        type: "string"
+      firstName:
+        type: "string"
+      lastName:
+        type: "string"
+      email:
+        type: "string"
+      password:
+        type: "string"
+      phone:
+        type: "string"
+    xml:
+      name: "User"
+  Category:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      libelle:
+        type: "string"
+    xml:
+      name: "Category"
+  Basket:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      dateLastUpdated:
+        type: "string"
+      articles:
+        $ref: "#/definitions/Article"
+      totalamount:
+        type: "integer"
+    xml:
+      name: "Category"
+  Order:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      date:
+         type: "string"
+      articles:
+        $ref: "#/definitions/Article"
+      customer:
+        $ref: "#/definitions/Customer"
+  OrderBill:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      libelle:
+         type: "string"
+      date:
+         type: "string"
+      price:
+        type: "integer"

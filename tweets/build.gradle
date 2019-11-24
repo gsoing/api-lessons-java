@@ -2,7 +2,6 @@ plugins {
 	id 'org.springframework.boot' version '2.1.7.RELEASE'
 	id 'idea'
 	id 'java'
-	id 'com.bmuschko.docker-spring-boot-application' version '5.3.0'
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -32,13 +31,4 @@ dependencies {
 
 	testImplementation 	'org.springframework.boot:spring-boot-starter-test'
 	testImplementation	'org.junit.jupiter:junit-jupiter:5.5.2'
-}
-
-docker {
-	springBootApplication {
-		baseImage = 'openjdk:8-alpine'
-		ports = [8080]
-		tag = 'gso/tweet'
-		jvmArgs = ['-Dspring.profiles.active=docker']
-	}
 }

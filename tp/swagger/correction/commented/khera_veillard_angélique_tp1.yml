@@ -1,0 +1,413 @@
+swagger: "2.0"
+info:
+  description: "Ceci est ma super API pour remplacer Amazon"
+  version: "1.0.0"
+  title: "e-commerce API"
+host: "commerce.io"
+basePath: "/v1"
+schemes:
+- "https"
+produces:
+  - application/json
+consumes: 
+  - application/json
+paths:
+###############################
+### ITEMS DISPLAY #############
+###############################
+  /users/{id}/items:
+    get:
+      summary: "Connected client can see personnal recommendations, hence user id to map to user's profile"
+      description: "Can return void or a list of recommended items"
+      operationId: "getSuggestionByUser"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of user"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses: 
+        # Un tableau aurait été parfait
+        200: 
+          description: 
+            "successful operation"
+          schema: 
+            $ref: "#/definitions/Item"          
+        400: 
+          description:
+            "invalid recommendations"
+  # On est sur une collection items avec un S c'est mieux
+  /item:
+    # Manque la pagination
+    get:
+      summary: "Search for item"
+      description: "Returns list of items"
+      operationId: "getItems"
+      responses: 
+        200: 
+          description: 
+            "successful operation"
+          schema: 
+            $ref: "#/definitions/Item"
+        400:
+          description: "Invalid item"
+  # Tu aurais pu fusionner les 3 services en 1
+  /item?price=gte:{min}&price=lte:{max}:
+    get:
+      summary: "Search for a price range"
+      description: "uses RHS Colon approch for greater than or equal and less than or equal"
+      operationId: "getItemsWithinPriceRange"
+      responses: 
+        200: 
+          description: 
+            "successful operation"
+          schema: 
+            $ref: "#/definitions/Item" 
+        400:
+          description: "Invalid price range"
+  # Tu aurais pu fusionner les 3 services en 1
+  /item/findByCategory:
+    get:
+      summary: "finds items corresponding to certain categories"
+      description: "multiple categories can be selected using comma sepatated strings"
+      operationId: "findItempsByCategory"
+      parameters:
+      - name: "category"
+        in: "query"
+        description: "category values that need to be considered for filter"
+        type: "array"
+        items: 
+          type: "string"
+          enum:
+          - "HIGH-TECH"
+          - "HOUSE FURNITURE"
+          - "CLOTHING"
+          default: "HIGH-TECH"
+      responses: 
+        200: 
+          description: 
+            "successful operation"
+          schema: 
+            type: "array"
+            items: 
+              $ref: "#/definitions/Item"
+        400:
+          description: "Invalid category value"
+  /item/{itemRef}/detail:
+    get:
+      summary: "shows details for one item"
+      description: "when clicked on an item, item id (itemRef) is put in url with /detail so the user can directly see more information about it"
+      operationId: "findItemDetail"
+      parameters:
+        - name: "itemRef"
+          in: "path"
+          description: "pathparam"
+          type: "string"
+          required: true
+      responses: 
+        200: 
+          description: 
+            "successful operation"
+          schema: 
+            $ref: "#/definitions/ItemDetail"
+        400:
+          description: "Invalid cart"
+###############################
+### CART MANAGEMENT   #########
+###############################
+  # On est sur une collection donc plutot /userS
+  /user/{id}/cart/cartItems:
+    parameters:
+      - name: "id"
+        in: "path"
+        description: "pathparam"
+        type: "string"
+        required: true
+    get:
+      summary: "shows user's cart"
+      description: ""
+      operationId: "findCartByUserId"
+      responses: 
+        200: 
+          description: 
+            "successful operation"
+          schema: 
+            type: "array"
+            items: 
+              $ref: "#/definitions/CartItems"
+        400:
+          description: "Invalid cart items"
+    post: 
+      summary: "adds an item to cart"
+      parameters:
+      - name: "id"
+        in: "query"
+        description: "pathparam"
+        type: "string"
+      - name: "item"
+        in: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/CartItems"
+      responses:
+        # Excellente idée de retourner le panier mis à jour
+        200: 
+          description: 
+            "successful operation"
+          schema: 
+            type: "array"
+            items: 
+              $ref: "#/definitions/CartItems"
+        400:
+          description: "Invalid cart items"
+    # Delete ne prend pas de body
+    # Donc il aurait fallu utiliser /user/{id}/cart/cartItems/{itemRef} par exemple
+    # ou un PATCH par exemple
+    delete:
+      summary: "deletes an item to cart"
+      parameters:
+      - name: "id"
+        in: "query"
+        description: "pathparam"
+        type: "string"
+      - name: "item"
+        in: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/CartItems"
+      responses:
+        200: 
+          description: 
+            "successful operation"
+          schema: 
+            type: "array"
+            items: 
+              $ref: "#/definitions/CartItems"
+        400:
+          description: "Invalid cart items"
+    # C'est vrai mais de ce cas tu passer le panier en entier
+    # pas juste un article
+    put:
+      summary: "updates an item to cart, put verb because cart is specified stateless"
+      parameters:
+      - name: "id"
+        in: "query"
+        description: "pathparam"
+        type: "string"
+      - name: "item"
+        in: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/CartItems"
+      responses:
+        200: 
+          description: 
+            "successful operation"
+          schema: 
+            type: "array"
+            items: 
+              $ref: "#/definitions/CartItems"
+        400:
+          description: "Invalid cart items"
+  /user/{id}/cart:
+    parameters:
+      - name: "id"
+        in: "path"
+        description: "pathparam"
+        type: "string"
+        required: true
+    delete:
+      summary: "deletes all items from cart"
+      operationId: emptyCart
+      responses:
+        200: 
+          description: 
+            "successful operation"
+          schema: 
+            type: "array"
+            items: 
+              $ref: "#/definitions/Cart"
+        400:
+          description: "Invalid cart items"
+  /user/{id}/cart/checkout:
+    parameters:
+      - name: "id"
+        in: "path"
+        description: "pathparam"
+        type: "string"
+        required: true
+    # Bonne idée, dommande qu'il manque la spec
+    post:
+      summary: "create an order"
+##############################
+##### ORDER MANAGEMENT #######
+##############################
+  # Manque un S et la pagination
+  /user/{id}/orders:
+    parameters:
+      - name: "id"
+        in: "path"
+        description: "pathparam"
+        type: "string"
+        required: true
+    get:
+      summary: "gets all orders"
+      operationId: getOrders
+      responses:
+        200: 
+          description: 
+            "successful operation"
+          schema: 
+            type: "array"
+            items: 
+              $ref: "#/definitions/Orders"
+        400:
+          description: "Invalid cart items"
+  # Tu aurais pu utiliser l'url du dessus avec un queryParam
+  /user/{id}/orders/findByStatus:
+    parameters:
+      - name: "id"
+        in: "path"
+        description: "pathparam"
+        type: "string"
+        required: true
+    get:
+      summary: "gets all orders"
+      parameters:
+        - name: "status"
+          in: "query"
+          description: "status values that need to be considered for filter"
+          type: "array"
+          items: 
+            type: "string"
+            enum:
+            - "HIGH-TECH"
+            - "HOUSE FURNITURE"
+            - "CLOTHING"
+            default: "HIGH-TECH"
+      responses:
+        200: 
+          description: 
+            "successful operation"
+          schema: 
+            type: "array"
+            items: 
+              $ref: "#/definitions/Orders"
+        400:
+          description: "Invalid cart items" 
+##############################
+##### DEFINITIONS ############
+##############################
+definitions:
+  User: 
+    type: "object"
+    properties: 
+      id:
+        type: "string"
+      #cart:
+      #  $ref: "/definitions/Cart"
+  Item: 
+    type: "object"
+    properties:
+      itemRef: 
+        type: "string"
+      itemName: 
+        type: "string"
+      price:
+        type: "number"
+        format: "float"
+      description:
+        type: "string"
+      image:
+        type: "string"
+      category:
+        type: "string"
+        description: "categories of item, we can add more later if needed!"
+        enum:
+          - "IN PROGRESS"
+          - "CONFIRMED"
+          - "COMPLETED"
+          - "CANCELED"
+        #itemDetail: 
+        #  $ref: "#/definitions/ItemDetail"
+  ItemDetail: 
+    type: "object"
+    properties: 
+      idDetail: 
+        type: "string"
+      itemRef:
+        type: "string"
+      fullDescription: 
+        type: "string"
+      photos: 
+        type: "array"
+        items:
+          type: string
+      dimensions:
+        type: "string"
+      similarItems: 
+        $ref: "#/definitions/Item"
+  Cart: 
+    type: "object"
+    properties: 
+      lastModifiedDate:
+        type: "string"
+        format: "date"
+      addedToCartItems: 
+        type: "array"
+        items:
+          $ref: "#/definitions/Item"
+      totalCost: 
+        type: "number"
+        format: "float"
+      userId: 
+        type: "string"
+  CartItems: 
+    type: "object"
+    properties:
+      itemRef: 
+        type: "string"
+      itemName: 
+        type: "string"
+      photo:
+        type: "string"
+      quantity: 
+        type: "number"
+      unitPrice:
+        type: "number"
+        format: "float"
+      totalCost: 
+        type: "number"
+        format: "float"
+      cartId:
+        type: "number"
+  Orders: 
+    type: "object"
+    properties:
+      id: 
+        type: "string"
+      status:
+        type: "object"
+        enum: 
+        - "IN PROGRESS"
+        - "CONFIRMED"
+        - "COMPLETED"
+        - "CANCELED"
+      description:
+        type: "string"
+      createdOn: 
+        type: "string"
+        format: "date"
+      lastMofifiedOn:
+        type: "string"
+        format: "date"
+      orderedItems: 
+        $ref: "#/definitions/CartItems"
+      totalPrice: 
+        type: "number"
+        format: "float"
+      userId: 
+        type: "string"
+        description: "foreign rey references User"
+  #article et quantité

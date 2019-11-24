@@ -1,0 +1,392 @@
+swagger: "2.0"
+info:
+  description: "Ceci est ma super API pour remplacer Amazon"
+  version: "1.0.0"
+  title: "e-commerce API"
+host: "commerce.io"
+basePath: "/v1"
+schemes:
+  - "https"
+produces:
+  - application/json
+consumes: 
+  - application/json
+paths:
+  /products/deals:
+    get:
+      tags:
+        - "products"
+      summary: "Get all deals"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Deals were successfully foud"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        204:
+          description: "No deals were found"
+  /products:
+    get:
+      tags:
+        - "products"
+      summary: "Get all products"
+      produces:
+        - "application/json"
+      # Manque la pagination et un paramètre de recherche
+      parameters:
+        - name: "sort"
+          in: "query"
+          description: "Sort products by price ('-' prefix for descending sort)"
+          required: false
+          type: "string"
+          enum:
+            - -price
+            - price
+        - name: "category"
+          in: "query"
+          description: "Filter products by category"
+          required: false
+          type: "string"
+          enum:
+            - HIGH-TECH
+            - HOME
+            - CLOTHES
+      responses:
+        200:
+          description: "Products obtained with success"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        204:
+          description: "Product list is empty"
+  /products/{ref}:
+    get:
+      tags:
+        - "products"
+      summary: "Get a product detail"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "ref"
+          in: "path"
+          type: string
+          description: "The product reference"
+          required: true
+      responses:
+        200:
+          description: "PRoduct with the specified ref have been fouund"
+          schema:
+            $ref: "#/definitions/ProductDetail"
+        404:
+          description: "No product with the specified ref have been found"
+  /basket:
+    get:
+      tags:
+        - "basket"
+      summary: "Get the user personnal basket"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "User basket successfully obtained"
+          schema:
+            $ref: "#/definitions/Basket"
+        204:
+          description: "User basket is empty"
+    patch:
+      tags:
+        - "basket"
+      summary: "Update user basket inclusing items"
+      produces:
+        - "application/json"
+      consumes:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Add, Remove or Replace items from the basket"
+          required: true
+          schema:
+            $ref: "#/definitions/PatchDto"
+      responses:
+        200:
+          description: "User backet successfully updated "
+          schema:
+            $ref: "#/definitions/Basket"
+  /basket/validate:
+    post:
+      tags:
+        - "basket"
+      summary: "Validate the user basket ans generate a new command with its items"
+      produces:
+        - "application/json"
+      responses:
+        # Très bien vu mais autant retourner une commande 
+        201:
+          description: "Command successfuully created from user basket"
+          schema:
+            $ref: "#/definitions/Basket"
+  # En e-commerce on parle plutot d'order
+  /commands:
+    get:
+      tags:
+        - "commands"
+      summary: "Get all user commands"
+      produces:
+        - "application/json"
+      # Manque la pagination
+      parameters:
+        - name: "status"
+          in: "query"
+          description: "Filter user commands by status"
+          required: false
+          type: string
+          enum:
+            - VALIDATED
+            - TERMINATED
+            - CANCELED
+            - IN PROCESS
+        - name: "sort"
+          in: "query"
+          description: "Sort purchased items by price or status ('-' prefix for descending sort)"
+          required: false
+          type: "string"
+          enum:
+            - -price
+            - price
+            - -status
+            - status
+      responses:
+        200:
+          description: "Commands research is successfull"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/CommandAbbr"
+  # La facture c'est invoice
+  /commands/{ref}/bill:
+    get:
+      tags:
+        - "commands"
+      summary: "Get bill of a specific command"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "ref"
+          in: "path"
+          description: "The command reference"
+          required: true
+          type: string
+      responses:
+        200:
+          description: "Command bill successfully obtained"
+          schema:
+            type: "string"
+            items:
+              $ref: "#/definitions/Bill"
+        404:
+          description: "No command with the specified ref have been found"
+definitions:
+  Product:
+    type: "object"
+    properties:
+      ref:
+        type: "string"
+        minLength: 0
+        maxLength: 64
+        readOnly: true
+      label:
+        type: "string"
+        minLength: 0
+        maxLength: 32
+      price:
+        type: "integer"
+        format: "double"
+        minimum: 0.01
+        maximum: 999999.99
+      description:
+        type: "string"
+        maxLength: 8192
+      image:
+        type: "string"
+        maxLength: 1024
+
+  ProductDetail:
+    type: "object"
+    properties:
+      categories:
+        type: "array"
+        items:
+          type: string
+      description:
+        type: "string"
+        maxLength: 1024
+      photos:
+        type: "array"
+        items:
+          type: string
+      dimensions:
+        type: "string"
+        maxLength: 32
+      relatedArticles:
+        type: "array"
+        items:
+          $ref: "#/definitions/Product"
+          
+  BasketItem:
+    type: "object"
+    properties:
+      ref:
+        type: "string"
+        minLength: 0
+        maxLength: 64
+      label:
+        type: "string"
+        maxLength: 64
+      photo:
+        type: "string"
+        maxLength: 1024
+      quantity:
+        type: "integer"
+        maximum: 999999
+      unitPrice:
+        type: "integer"
+        format: "double"
+        minimum: 0.01
+        maximum: 999999.99
+      totalPrice:
+        type: "integer"
+        format: "double"
+        minimum: 0.01
+        maximum: 999999.99
+
+  Basket:
+    type: "object"
+    properties:
+      lastUpdatedDate:
+        type: "string"
+        readOnly: true
+        format: "date"
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/BasketItem"
+      totalPrice:
+        type: "integer"
+        readOnly: true
+        format: "double"
+        minimum: 0.01
+        maximum: 999999.99
+
+  PatchDto:
+    type: "object"
+    properties:
+      op:
+        $ref: "#/definitions/PatchOperation"
+      path:
+        type: "string"
+        maxLength: 1024
+      value:
+        type: "object"
+  
+  PatchOperation:
+    type: string
+    enum:
+      - ADD
+      - REMOVE
+      - REPLACE
+
+  CommandStatus:
+    type: string
+    enum:
+      - VALIDATED
+      - TERMINATED
+      - CANCELED
+      - IN PROCESS
+  
+  Command:
+    type: "object"
+    properties:
+      ref:
+        type: "string"
+        readOnly: true
+        minLength: 0
+        maxLength: 64
+      clientId:
+        type: "string"
+        readOnly: true
+        maxLength: 64
+      creationDate:
+        type: "string"
+        readOnly: true
+        format: "date"
+      lastUpdatedDate:
+        type: "string"
+        readOnly: true
+        format: "date"
+      status:
+        $ref: "#/definitions/CommandStatus"
+      purchasedItems:
+        type: "array"
+        items:
+          $ref: "#/definitions/BasketItem"
+      totalPrice:
+        type: "integer"
+        readOnly: true
+        format: "double"
+        minimum: 0.01
+        maximum: 999999.99
+  CommandAbbr:
+    type: "object"
+    properties:
+      ref:
+        type: "string"
+        readOnly: true
+        minLength: 0
+        maxLength: 64
+      creationDate:
+        type: "string"
+        readOnly: true
+        format: "date"
+      status:
+        $ref: "#/definitions/CommandStatus"
+      totalPrice:
+        type: "integer"
+        readOnly: true
+        format: "double"
+        minimum: 0.01
+        maximum: 999999.99
+  Bill:
+    type: "object"
+    properties:
+      ref:
+        type: "string"
+        readOnly: true
+        minLength: 0
+        maxLength: 64
+      creationDate:
+        type: "string"
+        readOnly: true
+        format: "date"
+      content:
+        type: "string"
+        readOnly: true
+        maxLength: 8192
+
+
+# Parfait
+# Pour la gestion du panier question 4:
+# 
+# L'ajout d'un article au panier ser fait via l'operation ADD, path='/items' et value= Le body du produit
+# 
+# La suppression d'un article du panier se fait via l'operation REMOVE et path='/items/{position de l'item à supprimer}'. *value* ne doit pas être specifié
+# 
+# Vider le panier revient à faire un REMOVE du path='/items'
+#
+# Modifier la quantité d'une article se fait via l'operation REPLACE, path='/items/{position de l'item à modifier}/quantity' et value detient la nouvelle quantité
+# 
+# 
