@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+
+    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/spring.log}"/>
+    <property name="LOG_FILE_JSON" value="${LOG_FILE}.json}"/>
+
+    <jmxConfigurator/>
+
+    <appender name="FILE_REGULAR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+        <file>${LOG_FILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${LOG_FILE}.%i</fileNamePattern>
+        </rollingPolicy>
+        <triggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>10MB</MaxFileSize>
+        </triggeringPolicy>
+    </appender>
+
+
+    <appender name="CONSOLE_REGULAR" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <logger name="com.gso" level="DEBUG"/>
+
+    <root level="info">
+        <springProfile name="!aws">
+            <appender-ref ref="CONSOLE_REGULAR" />
+            <appender-ref ref="FILE_REGULAR" />
+        </springProfile>
+
+        <springProfile name="aws">
+            <appender-ref ref="CONSOLE_JSON" />
+            <appender-ref ref="FILE_REGULAR" />
+        </springProfile>
+    </root>
+
+</configuration>
