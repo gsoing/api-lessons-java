@@ -71,6 +71,8 @@ public class OptimisticLocking implements CommandLineRunner {
             log.info("USER 2 Finished " + this.documentService.findById(document.getDocumentId()));
         });
 
+        // cette méthode arrête tous les threads mêmes si ils n'ont pas fini
+        // je ne vois pas pkoi vous l'utilisez ici, alors que vous utilisez la bonne méthode en dessous
         es.shutdown();
         try {
             es.awaitTermination(10, TimeUnit.MINUTES);

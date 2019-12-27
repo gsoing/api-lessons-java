@@ -93,6 +93,7 @@ public class DocumentResource {
 
         Optional<DocumentEntity> optDocument = documentService.findDocument(documentId);
 
+        // Pour le coup la gestion fonctionnelle est plutôt à faire dans le service qui lui devrait lever l'exception
         if (!optDocument.isPresent()) {
             return NotFoundException.getError();
         }
@@ -110,7 +111,9 @@ public class DocumentResource {
 
     @ResponseBody
     @PostMapping("/{id}")
-    public ResponseEntity<?> updateDocument(@RequestHeader("If-Match") String ifMatchValue, @PathVariable("id") String documentId, @Valid @RequestBody DocumentDto documentDto) throws Exception {
+    public ResponseEntity<?> updateDocument(@RequestHeader("If-Match") String ifMatchValue,
+                                            @PathVariable("id") String documentId,
+                                            @Valid @RequestBody DocumentDto documentDto) throws Exception {
 
         Optional<DocumentEntity> optDocument = documentService.findDocument(documentId);
 

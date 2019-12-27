@@ -21,12 +21,15 @@ public class DocumentsApiController {
     @Autowired
     DocumentService documentService;
 
-    @ApiOperation(value = "lis le document", nickname = "documentsDocumentIdGet", notes = "retourne un document", response = Document.class, tags={ "documents", })
+    @ApiOperation(value = "lis le document", nickname = "documentsDocumentIdGet", notes = "retourne un document",
+            response = Document.class, tags={ "documents", })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "le document demandé", response = Document.class),
             @ApiResponse(code = 404, message = "le document n'existe pas", response = ErrorDefinition.class) })
     @GetMapping(value = "/documents/{documentId}",produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Document> documentsDocumentIdGet(@ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId) throws ApiException {
+    public ResponseEntity<Document> documentsDocumentIdGet(
+            @ApiParam(value = "identifiant du document",required=true)
+            @PathVariable("documentId") String documentId) throws ApiException {
             Document doc = documentService.findDocumentById(documentId);
             return ResponseEntity
                     .ok()
@@ -43,7 +46,11 @@ public class DocumentsApiController {
             @ApiResponse(code = 409, message = "le document est verouillé par un autre éditeur", response = Document.class),
             @ApiResponse(code = 412, message = "il existe une version plus récente du document", response = Document.class)})
     @RequestMapping(value = "/documents/{documentId}",method = RequestMethod.POST)
-    public ResponseEntity<Document> documentsDocumentIdPost(@RequestHeader(name = "If-Match", required = true) String requestIfMatch, @ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId, @ApiParam(value = "met à jour le texte, le titre, l'editeur et la date de mise à jour"  )  @RequestBody Document document) throws ApiException {
+    public ResponseEntity<Document> documentsDocumentIdPost(
+            @RequestHeader(name = "If-Match", required = true) String requestIfMatch,
+            @ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId,
+            @ApiParam(value = "met à jour le texte, le titre, l'editeur et la date de mise à jour"  ) @RequestBody Document document)
+            throws ApiException {
         if (isEmpty(requestIfMatch)) {
             return ResponseEntity.badRequest().build();
         }else{
@@ -60,7 +67,9 @@ public class DocumentsApiController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "la liste des documents", response = DocumentsList.class) })
     @GetMapping(value = "/documents",produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<DocumentsList> documentsGet(@ApiParam(value = "numéro de la page à retourner") @Valid @RequestParam(value = "page", required = false) Integer page, @ApiParam(value = "nombre de documents par page") @Valid @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+    public ResponseEntity<DocumentsList> documentsGet(
+            @ApiParam(value = "numéro de la page à retourner") @Valid @RequestParam(value = "page", required = false) Integer page,
+            @ApiParam(value = "nombre de documents par page") @Valid @RequestParam(value = "pageSize", required = false) Integer pageSize) {
         return new ResponseEntity<DocumentsList>(documentService.findAll(page,pageSize), HttpStatus.OK);
     }
 

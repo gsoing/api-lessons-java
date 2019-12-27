@@ -32,17 +32,23 @@ import java.util.HashMap;
 public class DocumentApiEndpoint implements DocumentApi {
 
     @Autowired
+    // pourquoi un dto injecté ?
     private DocumentDto documentDto;
 
     @Autowired
     private DocumentService documentService;
 
+    // pareil ca ne sert à rien il faut le virer
     private HashMap<String, Lock> lockList;
 
     private static final Logger log = LoggerFactory.getLogger(DocumentApiEndpoint.class);
 
+    // idem
     private final ObjectMapper objectMapper;
 
+    // Alors je ne sais pas si vous en êtes conscient mais mettre la request en variable de class
+    // est dangereux, un controller est un singleton donc une fois la requête setté c'est toujours la même
+    // spring s'occupe d'injecter la requête courante
     private final HttpServletRequest request;
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -52,7 +58,11 @@ public class DocumentApiEndpoint implements DocumentApi {
         this.lockList = new HashMap<>();
     }
 
-    public ResponseEntity<Document> documentsDocumentIdGet(@ApiParam(value = "Document Id",required=true) @PathVariable("documentId") String documentId) throws NotFoundException, BadRequestException {
+    public ResponseEntity<Document> documentsDocumentIdGet(
+            @ApiParam(value = "Document Id",required=true) @PathVariable("documentId") String documentId)
+            throws NotFoundException, BadRequestException {
+        // une annotation étit largement suffisante
+        // @Consume("application/json")
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             return new ResponseEntity<>( this.documentService.findDocumentById(documentId), HttpStatus.OK);
@@ -93,7 +103,9 @@ public class DocumentApiEndpoint implements DocumentApi {
         throw new BadRequestException();
     }
 
-    public ResponseEntity<DocumentsList> documentsGet(@ApiParam(value = "page number") @RequestParam(value = "page", required = false) Integer page, @ApiParam(value = "number of pages in the document") @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+    public ResponseEntity<DocumentsList> documentsGet(
+            @ApiParam(value = "page number") @RequestParam(value = "page", required = false) Integer page,
+            @ApiParam(value = "number of pages in the document") @RequestParam(value = "pageSize", required = false) Integer pageSize) {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             try {

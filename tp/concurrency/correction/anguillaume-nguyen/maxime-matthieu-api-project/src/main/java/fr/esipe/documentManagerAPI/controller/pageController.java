@@ -20,6 +20,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
+// Ca ne correspond pas à la spécification que j'ai donné
 @RestController
 @RequestMapping("/documents/list")
 public class pageController

@@ -45,6 +45,7 @@ public class DocumentService {
 
     public Doc updateDocument(Doc updateDocument) {
 
+        // ca fait la 2eme fois qu'on check si il est présent je pense qu'on en est sur la :P
         Optional<Doc> actualDocument = Optional.of((documentRepository.findById(updateDocument.getDocumentId()).orElseThrow(() -> NotFoundException.DEFAULT)));
         Optional<Lock> actualLock = (lockRepository.findByLockId(updateDocument.getDocumentId()));
 
@@ -84,6 +85,8 @@ public class DocumentService {
         }
         else {
             lock.setLockId(documentId);
+            // en fait il aurait fallu faire un insert pour que ca fonctionne dans tous les cas
+            // save fait un update ou insert donc jamais de conflit sur l'identifiant
             lockRepository.save(lock);
             return lock;
         }

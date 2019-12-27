@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+// ca aurait été mieux rangé dans endpoint non ?
 public interface DocumentApi {
     @ApiOperation(value = "looking for the document", nickname = "documentsDocumentIdGet", notes = "return the looked on document ", response = Document.class, tags={ "documents", })
     @ApiResponses(value =
@@ -82,7 +83,9 @@ public interface DocumentApi {
     @RequestMapping(value = "/documents",
             method = RequestMethod.GET,
             produces = "application/json")
-    ResponseEntity<DocumentsList> documentsGet(@ApiParam(value = "page number") @Valid @RequestParam(value = "page", required = false) Integer page, @ApiParam(value = "Nombre de documents par page") @Valid @RequestParam(value = "pageSize", required = false) Integer pageSize);
+    ResponseEntity<DocumentsList> documentsGet (
+            @ApiParam(value = "page number") @Valid @RequestParam(value = "page", required = false) Integer page,
+            @ApiParam(value = "Nombre de documents par page") @Valid @RequestParam(value = "pageSize", required = false) Integer pageSize);
 
     @ApiOperation(value = "Create a document", nickname = "documentsPost", notes = "", response = Document.class, tags={ "documents", })
     @ApiResponses(value =

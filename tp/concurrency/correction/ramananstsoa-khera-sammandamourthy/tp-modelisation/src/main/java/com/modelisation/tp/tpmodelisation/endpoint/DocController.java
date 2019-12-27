@@ -124,13 +124,17 @@ public class DocController {
     @ResponseBody
     public ResponseEntity<DocDto>
     updateDoc(@PathVariable("id") String documentId, @Valid @RequestBody DocDto docDto) {
+        // Cela aurait pu être géré au niveau du service et retourné une ConflictException
         String lock = docService.getDocument(documentId).getCustomLock();
         if (!lock.equals("unlocked")) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(null);
         } else {
+            // idem toute cette partie aurait pu être faite dans la couche service
             Long basicVersion = docService.getDocument(documentId).getVersion();
+
+            // Je ne comprends pas cette instruction
             docDto.setCustomLock(lock);
             Doc doc = docDto.toEntity();
             doc.setDocumentId(documentId);
@@ -191,7 +195,10 @@ public class DocController {
      */
     @RequestMapping(method = {RequestMethod.POST, RequestMethod.HEAD}, path = "/{documentId}/lock")
     @ResponseBody
-    public ResponseEntity<CustomLockDto> createLock(@PathVariable("documentId") String documentId, @Valid @RequestBody CustomLockDto lockDto, UriComponentsBuilder uriComponentsBuilder) throws InterruptedException {
+    public ResponseEntity<CustomLockDto> createLock(
+            @PathVariable("documentId") String documentId,
+            @Valid @RequestBody CustomLockDto lockDto, UriComponentsBuilder uriComponentsBuilder)
+            throws InterruptedException {
         Doc doc = docService.getDocument(documentId);
         if (!doc.getCustomLock().equals("unlocked")) {
             String customLockId = doc.getCustomLock();

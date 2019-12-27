@@ -60,6 +60,7 @@ public class DocumentServiceImpl {
 
     public Lock getDocumentLock(String documentId) {
         Document document = findById(documentId);
+        // autant retourné directement l'objet lock
         if (document.getLock() != null) {
             return document.getLock();
         }
@@ -69,9 +70,12 @@ public class DocumentServiceImpl {
     public Lock putDocumentLock(Lock lock, String documentId) {
         Document document = findById(documentId);
         Lock result = getDocumentLock(documentId);
+        // Il n'y a rien au dessus qui traite le cas que le verrou est déjà posé
         if (result != null)
             return result;
         else {
+            // Techniquement la méthode getDocumentLock peut retourner null même si ce ne sera jamais le cas
+            // ce bout de code n'est pas super logique par rapport à getDocumentLock
             if (lock.getId() == null)
                 lock.setId(UUID.randomUUID().toString());
             if (lock.getCreated() == null)

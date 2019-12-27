@@ -62,6 +62,7 @@ public class DocumentService {
     }
 
     public Document save(Document doc) throws ApiException {
+        // Tout cela aurait pu être géré par des annotations sur le model
         if(doc.getDocumentId() != null && doc.getCreated() != null
                 && doc.getUpdated() != null && doc.getTitle() != null
                 && doc.getCreator() != null && doc.getEditor() != null

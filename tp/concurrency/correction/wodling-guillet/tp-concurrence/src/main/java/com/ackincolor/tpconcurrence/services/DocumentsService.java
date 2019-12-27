@@ -38,6 +38,7 @@ public class DocumentsService {
     public DocumentsList findAll() {
         List<Document> liste = this.documentRepository.findAll();
         List<DocumentSummary> liste2 = new ArrayList<>();
+        // On est en java8 les stream ca exsite :D
         for(Document doc : liste){
             liste2.add(new DocumentSummary(doc));
         }
@@ -58,6 +59,7 @@ public class DocumentsService {
                 try {
                     this.removeLockOnDocument(documentId);
                 } catch (NotFoundException e) {
+                    // alors c'est un tp mais jamais ca dans un vrai projet
                     e.printStackTrace();
                 }
                 throw new ConflictException("Une version du document plus récente existe déjà",null);
@@ -93,6 +95,7 @@ public class DocumentsService {
                 throw new ConflictException("Document déjà verouillé par : ",l);
             lock.created(new Date(System.currentTimeMillis()));
             lock.setLockId(documentId);
+            // Alors bonne idée mais save fait un insert ou un update si le document est présent
             l =this.lockRepository.save(lock);
             //Lock l = this.lockList.put(documentId,lock);
             if(l!=null){

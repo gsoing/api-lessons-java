@@ -32,7 +32,7 @@ public class DocumentService {
     }
 
     public DocumentModel createDocument(DocumentModel document) {
-        return documentRepository.save(document);
+        return documentRepository.insert(document);
     }
 
     public DocumentModel update(DocumentModel document, String etag) {

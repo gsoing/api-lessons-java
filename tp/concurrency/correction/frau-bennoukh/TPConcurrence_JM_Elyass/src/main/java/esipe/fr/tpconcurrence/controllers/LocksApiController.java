@@ -26,12 +26,15 @@ public class LocksApiController{
     DocumentService documentService;
 
 
-    @ApiOperation(value = "pose un verrou sur le document", nickname = "documentsDocumentIdLockPut", notes = "l'utilisateur peut poser un verrou si aucun n'autre n'est posé ", response = Lock.class, tags={ "locks", })
+    @ApiOperation(value = "pose un verrou sur le document", nickname = "documentsDocumentIdLockPut",
+            notes = "l'utilisateur peut poser un verrou si aucun n'autre n'est posé ", response = Lock.class, tags={ "locks", })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "le verrou est posé", response = Lock.class),
             @ApiResponse(code = 409, message = "un verrou est déjà posé, retourne le verrou déjà posé", response = Lock.class) })
     @RequestMapping(value = "/documents/{documentId}/lock", method = RequestMethod.PUT)
-    public ResponseEntity<Lock> documentsDocumentIdLockPut(@ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId, @ApiParam(value = "l'objet verrou posé"  )  @Valid @RequestBody Lock lock) throws ApiException {
+    public ResponseEntity<Lock> documentsDocumentIdLockPut(
+            @ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId,
+            @ApiParam(value = "l'objet verrou posé"  )  @Valid @RequestBody Lock lock) throws ApiException {
         Lock responseLock = documentService.setLock(lock,documentId);
         if(responseLock.getOwner().equals(lock.getOwner()) && responseLock.getCreated().equals(lock.getCreated())){
             return ResponseEntity
@@ -49,7 +52,8 @@ public class LocksApiController{
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "le verrou est supprimé") })
     @RequestMapping(value = "/documents/{documentId}/lock",method = RequestMethod.DELETE)
-    public ResponseEntity<?> documentsDocumentIdLockDelete(@ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId) throws ApiException {
+    public ResponseEntity<?> documentsDocumentIdLockDelete(
+            @ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId) throws ApiException {
         documentService.deleteLock(documentId);
         return new ResponseEntity("Le verrou est supprimé",HttpStatus.NO_CONTENT);
     }
@@ -61,7 +65,8 @@ public class LocksApiController{
             @ApiResponse(code = 200, message = "le verrou posé", response = Lock.class),
             @ApiResponse(code = 204, message = "Aucun verrou posé") })
     @RequestMapping(value = "/documents/{documentId}/lock", method = RequestMethod.GET)
-    public ResponseEntity<Lock> documentsDocumentIdLockGet(@ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId) throws ApiException {
+    public ResponseEntity<Lock> documentsDocumentIdLockGet(
+            @ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId) throws ApiException {
         Lock responseLock = documentService.findLock(documentId);
         if(responseLock != null){
             return ResponseEntity

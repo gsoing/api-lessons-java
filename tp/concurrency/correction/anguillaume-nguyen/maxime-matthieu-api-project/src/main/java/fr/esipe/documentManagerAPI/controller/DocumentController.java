@@ -130,6 +130,7 @@ public class DocumentController {
                 }
 
         }catch(Exception e){
+            // on peut faire mieux, genre une erreur HTTP 500 plutot que ça
             e.printStackTrace();
         }
 

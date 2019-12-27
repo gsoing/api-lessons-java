@@ -104,6 +104,7 @@ public class DocumentController {
 
         Doc actualDocument = documentService.getDocument(documentId);
 
+        // Ca n'arrivera jamais puisque vous levez une NotFoundException dans la méthode getDocument
         if(actualDocument == null) {
             return ResponseEntity.notFound().build();
         }
@@ -116,6 +117,8 @@ public class DocumentController {
         document.setDocumentId(documentId);
         Doc updatedDocument = documentService.updateDocument(document);
 
+        // heu il ne peut pas être nul à ce stade, ce serait pas plutot updatedDocument que vous vouliez tester ?
+        // si c'est le cas c'est qu'un verrou a déjà été posé donc plutot une erreur 409
         if(actualDocument == null) {
             return ResponseEntity.badRequest().build();
         }
@@ -148,6 +151,8 @@ public class DocumentController {
 
         Doc document = documentService.getDocument(documentId);
 
+        // Même remarque ca ne peut pas arriver car la méthode getDocument lance une exception si
+        //le document n'existe pas
         if(document == null) {
             return ResponseEntity.notFound().build();
         }

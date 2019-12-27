@@ -41,6 +41,7 @@ public class DocumentService {
 
         DocumentEntity createdDocument = documentRepository.save(documentEntity);
 
+
         createdDocument.setEtag(CommonUtil.buildEtag(mapper.writeValueAsString(createdDocument)));
 
         return createdDocument;
@@ -59,18 +60,23 @@ public class DocumentService {
         }
 
         DocumentEntity document = optDocument.get();
+        // Ca fonctionne mais c'est plus simple de le calculer puis de le stocker cela évite de sérialiser le doc
+        // a chaque lecture
         document.setEtag(CommonUtil.buildEtag(mapper.writeValueAsString(document)));
 
         return Optional.of(document);
     }
 
     @Transactional
-    public Optional<DocumentEntity> updateDocument(String documentId, DocumentEntity updatedDocumentEntity) throws Exception {
+    public Optional<DocumentEntity> updateDocument(String documentId, DocumentEntity updatedDocumentEntity)
+            throws Exception {
 
         EntityManager em = emf.createEntityManager();
 
         em.getTransaction().begin();
 
+        //Ici tu aurais du mettre un lock également car une autre transaction peut arriver en parallèle comme avec le lock
+        // ou alors tu aurais pu faire appel à la méthode lock
         DocumentEntity document = em.find(DocumentEntity.class, documentId);
 
         if (document.getLock() != null) {
@@ -136,7 +142,8 @@ public class DocumentService {
         DocumentEntity documentEntity = em.find(DocumentEntity.class, documentId);
 
         em.getTransaction().commit();
-
+        // Il aurait été pas mal de vérifier que le document est présent avant de retourner le lock cela aurait évité
+        // une NPE
         return Optional.ofNullable(documentEntity.getLock());
 
     }

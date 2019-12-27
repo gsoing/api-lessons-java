@@ -34,17 +34,22 @@ import springfox.documentation.spring.web.json.Json;
 public class DocumentsApiController implements DocumentsApi {
 
     @Autowired
+    // Vous ne vous en servez pas ici vous pouvez ne pas l'injecter
     private DocumentRepository documentRepository;
 
     @Autowired
     private DocumentsService documentsService;
 
+    // A quoi cela sert ?
     private HashMap<String,Lock> lockList;
 
     private static final Logger log = LoggerFactory.getLogger(DocumentsApiController.class);
 
+    // A quoi il sert ?
     private final ObjectMapper objectMapper;
 
+    // La request en attribut de la classe ca ne peut pas fonctionner
+    // il peut y avoir plusieurs requêtes en parallèle
     private final HttpServletRequest request;
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -54,7 +59,10 @@ public class DocumentsApiController implements DocumentsApi {
         this.lockList = new HashMap<>();
     }
 
-    public ResponseEntity<Document> documentsDocumentIdGet(@ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId) throws NotFoundException,BadRequestException {
+    public ResponseEntity<Document> documentsDocumentIdGet(
+            @ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId)
+            throws NotFoundException,BadRequestException {
+        // Cela peut-être traité par l'annotation @Consume
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             return new ResponseEntity<>( this.documentsService.findDocumentById(documentId),HttpStatus.OK);
@@ -62,7 +70,9 @@ public class DocumentsApiController implements DocumentsApi {
         throw new BadRequestException();
     }
 
-    public ResponseEntity<String> documentsDocumentIdLockDelete(@ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId) throws NotFoundException,BadRequestException{
+    public ResponseEntity<String> documentsDocumentIdLockDelete(
+            @ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId)
+            throws NotFoundException,BadRequestException{
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             this.documentsService.removeLockOnDocument(documentId);
@@ -71,7 +81,9 @@ public class DocumentsApiController implements DocumentsApi {
         throw new BadRequestException();
     }
 
-    public ResponseEntity<Lock> documentsDocumentIdLockGet(@ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId) throws NoContentException ,BadRequestException {
+    public ResponseEntity<Lock> documentsDocumentIdLockGet(
+            @ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId)
+            throws NoContentException ,BadRequestException {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
                 return new ResponseEntity<>( this.documentsService.getLockOfDocument(documentId),HttpStatus.OK);
@@ -79,7 +91,10 @@ public class DocumentsApiController implements DocumentsApi {
         throw new BadRequestException();
     }
 
-    public ResponseEntity<Lock> documentsDocumentIdLockPut(@ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId,@ApiParam(value = "l'objet verrou posé"  )  @RequestBody Lock lock) throws ConflictException, NoContentException ,BadRequestException{
+    public ResponseEntity<Lock> documentsDocumentIdLockPut(
+            @ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId,
+            @ApiParam(value = "l'objet verrou posé"  )  @RequestBody Lock lock)
+            throws ConflictException, NoContentException ,BadRequestException{
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             return new ResponseEntity<Lock>(this.documentsService.lockDocument(documentId,lock),HttpStatus.OK);
@@ -87,7 +102,10 @@ public class DocumentsApiController implements DocumentsApi {
         throw new BadRequestException();
     }
 
-    public ResponseEntity<Document> documentsDocumentIdPost(@ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId,@ApiParam(value = "met à jour le texte, le titre, l'editeur et la date de mise à jour"  )  @RequestBody Document document) throws ConflictException,BadRequestException {
+    public ResponseEntity<Document> documentsDocumentIdPost(
+            @ApiParam(value = "identifiant du document",required=true) @PathVariable("documentId") String documentId,
+            @ApiParam(value = "met à jour le texte, le titre, l'editeur et la date de mise à jour"  )  @RequestBody Document document)
+            throws ConflictException,BadRequestException {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             return new ResponseEntity<Document>(this.documentsService.updateDocument(document,documentId), HttpStatus.OK);
@@ -95,7 +113,9 @@ public class DocumentsApiController implements DocumentsApi {
         throw new BadRequestException();
     }
 
-    public ResponseEntity<DocumentsList> documentsGet(@ApiParam(value = "numéro de la page à retourner") @RequestParam(value = "page", required = false) Integer page, @ApiParam(value = "nombre de documents par page") @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+    public ResponseEntity<DocumentsList> documentsGet(
+            @ApiParam(value = "numéro de la page à retourner") @RequestParam(value = "page", required = false) Integer page,
+            @ApiParam(value = "nombre de documents par page") @RequestParam(value = "pageSize", required = false) Integer pageSize) {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             try {
@@ -106,10 +126,12 @@ public class DocumentsApiController implements DocumentsApi {
                 return new ResponseEntity<DocumentsList>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
+        // ah on passe sur une erreur 405 et plus 400
         return new ResponseEntity<DocumentsList>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    public ResponseEntity<Document> documentsPost(@ApiParam(value = "Document" ,required=true ) @RequestBody Document document) throws BadRequestException{
+    public ResponseEntity<Document> documentsPost(
+            @ApiParam(value = "Document" ,required=true ) @RequestBody Document document) throws BadRequestException{
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
                 return new ResponseEntity<Document>(this.documentsService.saveDocument(document), HttpStatus.OK);
