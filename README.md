@@ -11,8 +11,3 @@ Les cours associés sont les suivants :
 * [v4 - Definir son plan d'URL](https://docs.google.com/presentation/d/1czfoc5Emr0WiH4mEh80IVIO6OAvCcfOuwOCkC8CZCE8/edit?usp=sharing)
 * [v5 - Sécurité](https://drive.google.com/open?id=10dtWbzsSQ5EHtsS7zNTdwJUEeLHDvVXHFIOzoiqnrFA)
 * [v6 - Beyond](https://drive.google.com/open?id=1kjB5UpSHd87Is-Iz7C2FOVjPGZErV-raNyTm5h9O_YA)
-
-## Exemples et exercices
-* Un exemple d'implémentation est fait [ici](tweets)   
-* Les TP avec leur corrections sont [ici](tp)
-* Un exemple de mise en place d'API manager est [ici](api-manager)

@@ -1,9 +1,0 @@
-host: "localhost:9090"
-basePath: "/api"
-server:
-  port: 9090
-spring:
-  data.mongodb:
-    port: 27017
-    database: concurrency
-spring.main.allow-bean-definition-overriding: true
