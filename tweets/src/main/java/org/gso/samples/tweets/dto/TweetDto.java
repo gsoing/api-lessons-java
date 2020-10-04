@@ -31,7 +31,7 @@ public class TweetDto {
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private ZonedDateTime modified;
     @NotBlank
-    private String user;
+    private UserDto user;
 
 
     public Tweet toEntity() {
@@ -39,6 +39,7 @@ public class TweetDto {
                 .id(id)
                 .text(text)
                 .source(source)
+                .user(user.toEntity())
                 .build();
     }
 }

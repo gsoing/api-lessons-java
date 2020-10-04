@@ -34,7 +34,7 @@ public class Tweet {
     @NotNull
     private Source source;
     @NotBlank
-    private String user;
+    private User user;
     @Transient
     private String etag;
 
@@ -48,7 +48,7 @@ public class Tweet {
      * @param modified
      */
     @PersistenceConstructor
-    public Tweet(String id, String text, String user,
+    public Tweet(String id, String text, User user,
                  Source source, LocalDateTime created, LocalDateTime modified) {
         this.id = id;
         this.text = text;
@@ -62,7 +62,7 @@ public class Tweet {
         return TweetDto.builder()
                 .id(id)
                 .text(text)
-                .user(user)
+                .user(user.toDto())
                 .created(RestUtils.convertToZoneDateTime(created))
                 .modified(RestUtils.convertToZoneDateTime(modified))
                 .source(source)
