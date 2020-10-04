@@ -1,11 +1,5 @@
 version: "3"
 services:
-  tweet:
-    image: gso/tweet
-    ports:
-      - "9090:8080"
-    links:
-      - mongo
   mongo:
     image: mongo
     ports:
