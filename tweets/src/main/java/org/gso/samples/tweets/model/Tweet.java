@@ -33,7 +33,7 @@ public class Tweet {
     private String text;
     @NotNull
     private Source source;
-    @NotBlank
+    @NotNull
     private User user;
     @Transient
     private String etag;

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.gso.samples.tweets.model.Tweet;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.ZonedDateTime;
 
@@ -30,7 +31,7 @@ public class TweetDto {
     private ZonedDateTime created;
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private ZonedDateTime modified;
-    @NotBlank
+    @NotNull
     private UserDto user;
 
 
