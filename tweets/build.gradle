@@ -36,3 +36,7 @@ dependencies {
 test {
 	useJUnitPlatform()
 }
+
+bootBuildImage {
+	imageName = "gso/tweet-docker"
+}

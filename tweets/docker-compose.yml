@@ -1,5 +1,11 @@
 version: "3"
 services:
+  twitter:
+    image: gso/tweet-docker
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
   mongo:
     image: mongo
     ports:

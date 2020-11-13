@@ -27,9 +27,6 @@ public class TweetService {
     private final TweetRepository tweetRepository;
     private final CustomTweetRepository customTweetRepository;
 
-    private QueryConversionPipeline pipeline = QueryConversionPipeline.defaultPipeline();
-
-
     public Tweet getTweet(String id) {
         Tweet tweet = tweetRepository.findById(id).orElseThrow(()-> NotFoundException.DEFAULT);
         return tweet;
@@ -57,27 +54,11 @@ public class TweetService {
         return tweetRepository.save(tweet);
     }
 
-    public Page<Tweet> getTweets(String stringQuery, Pageable pageable) {
-        Criteria criteria = convertQuery(stringQuery);
+    public Page<Tweet> getTweets(Criteria criteria, Pageable pageable) {
         Page<Tweet> results = customTweetRepository.findTweets(criteria, pageable);
         return results;
     }
 
-    /**
-     * Convertit une requête RSQL en un objet Criteria compréhensible par la base
-     * @param stringQuery
-     * @return
-     */
-    private Criteria convertQuery(String stringQuery){
-        Criteria criteria;
-        if(!StringUtils.isEmpty(stringQuery)) {
-            Condition<GeneralQueryBuilder> condition = pipeline.apply(stringQuery, Tweet.class);
-            criteria = condition.query(new MongoVisitor());
-        } else {
-            criteria = new Criteria();
-        }
-        return criteria;
-    }
 
     public Page<Tweet> getTweetsByNickname(String nickname, Pageable pageable) {
         return tweetRepository.findByName(nickname, pageable);

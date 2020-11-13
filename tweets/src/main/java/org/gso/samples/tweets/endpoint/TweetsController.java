@@ -1,5 +1,9 @@
 package org.gso.samples.tweets.endpoint;
 
+import com.github.rutledgepaulv.qbuilders.builders.GeneralQueryBuilder;
+import com.github.rutledgepaulv.qbuilders.conditions.Condition;
+import com.github.rutledgepaulv.qbuilders.visitors.MongoVisitor;
+import com.github.rutledgepaulv.rqe.pipes.QueryConversionPipeline;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gso.samples.tweets.dto.PageData;
@@ -9,10 +13,12 @@ import org.gso.samples.tweets.service.TweetService;
 import org.gso.samples.tweets.utils.RestUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -37,6 +43,8 @@ public class TweetsController {
     public static final String PATH = "/api/v1/tweets";
 
     private final TweetService tweetService;
+    private QueryConversionPipeline pipeline = QueryConversionPipeline.defaultPipeline();
+
 
     @RequestMapping(method = {RequestMethod.GET, RequestMethod.HEAD}, path = "/{id}")
     @ResponseBody
@@ -97,7 +105,9 @@ public class TweetsController {
                                                         @PageableDefault(page = 0, size = 20) Pageable pageable,
                                                         UriComponentsBuilder uriComponentsBuilder) {
 
-        Page<Tweet> results = tweetService.getTweets(query, pageable);
+        Criteria criteria = convertQuery(query);
+
+        Page<Tweet> results = tweetService.getTweets(criteria, pageable);
         PageData<TweetDto> pageResult = PageData.fromPage(results.map(Tweet::toDto));
         if (RestUtils.hasNext(results, pageable)) {
             pageResult.setNext(RestUtils.buildNextUri(uriComponentsBuilder, pageable));
@@ -109,5 +119,20 @@ public class TweetsController {
                 .body(pageResult);
     }
 
+    /**
+     * Convertit une requête RSQL en un objet Criteria compréhensible par la base
+     * @param stringQuery
+     * @return
+     */
+    private Criteria convertQuery(String stringQuery){
+        Criteria criteria;
+        if(!StringUtils.isEmpty(stringQuery)) {
+            Condition<GeneralQueryBuilder> condition = pipeline.apply(stringQuery, Tweet.class);
+            criteria = condition.query(new MongoVisitor());
+        } else {
+            criteria = new Criteria();
+        }
+        return criteria;
+    }
 
 }
