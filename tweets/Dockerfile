@@ -7,7 +7,7 @@ RUN ls -la ./
 RUN gradle build
 RUN ls ./build/libs
 
-FROM adoptopenjdk/openjdk11:jre-11.0.9_11-alpine
+FROM openjdk:11
 COPY --from=build /build/build/libs/application.jar ./
 
-CMD ["java", "application.jar"]
+CMD ["java", "-jar", "application.jar"]
