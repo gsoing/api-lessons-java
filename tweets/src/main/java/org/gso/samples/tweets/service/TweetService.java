@@ -18,7 +18,6 @@ import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 /**
  * Cette classe contient la logique métier à appliquer à nos tweets
  */
@@ -27,6 +26,10 @@ public class TweetService {
     private final TweetRepository tweetRepository;
     private final CustomTweetRepository customTweetRepository;
 
+    public TweetService(TweetRepository tweetRepository, CustomTweetRepository customTweetRepository) {
+        this.customTweetRepository = customTweetRepository;
+        this.tweetRepository = tweetRepository;
+    }
     public Tweet getTweet(String id) {
         Tweet tweet = tweetRepository.findById(id).orElseThrow(()-> NotFoundException.DEFAULT);
         return tweet;

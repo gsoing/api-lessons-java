@@ -37,6 +37,10 @@ test {
 	useJUnitPlatform()
 }
 
+bootJar {
+	archiveFileName = "application.jar"
+}
+
 bootBuildImage {
 	imageName = "gso/tweet-docker"
 }
