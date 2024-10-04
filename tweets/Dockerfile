@@ -1,13 +1,10 @@
-FROM gradle:6.6.1-jdk11-hotspot as build
+FROM gradle:8.10-alpine as compile
 
-WORKDIR /build
-COPY ./src ./src
-COPY ./build.gradle ./settings.gradle ./
-RUN ls -la ./
-RUN gradle build
-RUN ls ./build/libs
+COPY . .
+RUN gradle clean build --no-daemon
 
-FROM openjdk:11
-COPY --from=build /build/build/libs/application.jar ./
-
-CMD ["java", "-jar", "application.jar"]
+FROM eclipse-temurin:21.0.4_7-jre-noble
+WORKDIR /home/application/java
+COPY --from=compile "/home/gradle/build/libs/application.jar" .
+EXPOSE 8080
+ENTRYPOINT [ "java", "-jar", "/home/application/java/application.jar"]

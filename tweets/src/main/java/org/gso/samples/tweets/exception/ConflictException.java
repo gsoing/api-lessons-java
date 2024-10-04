@@ -16,9 +16,6 @@ public class ConflictException extends AbstractTweetException {
 
     public ConflictException(String code, String message) {
         super(HttpStatus.CONFLICT,
-                ErrorMessage.builder()
-                        .code(code)
-                        .message(message)
-                        .build());
+                new ErrorMessage(code, message));
     }
 }

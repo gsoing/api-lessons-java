@@ -1,24 +1,22 @@
 package org.gso.samples.tweets.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 
-import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PageData<T> {
 
     private URI next;
     private long totalElements;
     private int page;
-    @NotNull
+    @NotEmpty
     private List<T> data;
 
 
@@ -40,10 +38,7 @@ public class PageData<T> {
     }
 
     public static <T> PageData<T> fromPage(Page<T> page) {
-        return PageData.<T>builder()
-                .data(page.getContent())
-                .page(page.getNumber())
-                .totalElements(page.getTotalElements())
-                .build();
+        var pageData = new PageData<T>(page.getTotalElements(), page.getNumber(), page.getContent());
+        return pageData;
     }
 }

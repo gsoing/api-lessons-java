@@ -31,4 +31,8 @@ public class RestUtils {
                 .replaceQueryParam("page", pageable.getPageNumber() + 1)
                 .replaceQueryParam("size",pageable.getPageSize()).encode().build().toUri();
     }
+
+    public static URI buildLocation(String path, String id) {
+        return UriComponentsBuilder.fromPath(path).pathSegment(id).build().toUri();
+    }
 }

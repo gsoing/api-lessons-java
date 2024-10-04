@@ -12,9 +12,6 @@ public class BadRequestException extends AbstractTweetException {
 
     private BadRequestException() {
         super(HttpStatus.BAD_REQUEST,
-                ErrorMessage.builder()
-                        .code(BAD_REQUEST_CODE)
-                        .message(BAS_REQUEST_MESSAGE)
-                        .build());
+                new ErrorMessage(BAD_REQUEST_CODE,BAS_REQUEST_MESSAGE));
     }
 }

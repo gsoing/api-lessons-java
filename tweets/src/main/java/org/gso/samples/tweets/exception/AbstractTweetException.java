@@ -13,7 +13,7 @@ public class AbstractTweetException extends RuntimeException {
 
 
     public AbstractTweetException(HttpStatus httpStatus, ErrorMessage errorMessage) {
-        super(errorMessage.getMessage());
+        super(errorMessage.message());
         this.errorMessage = errorMessage;
         this.httpStatus = httpStatus;
     }

@@ -12,9 +12,6 @@ public class NotFoundException extends AbstractTweetException {
 
     private NotFoundException() {
         super(HttpStatus.NOT_FOUND,
-                ErrorMessage.builder()
-                        .code(NOT_FOUND_CODE)
-                        .message(NOT_FOUND_MESSAGE)
-                        .build());
+                new ErrorMessage(NOT_FOUND_CODE, NOT_FOUND_MESSAGE));
     }
 }

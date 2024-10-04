@@ -12,9 +12,6 @@ public class ForbiddenException extends AbstractTweetException {
 
     private ForbiddenException() {
         super(HttpStatus.FORBIDDEN,
-                ErrorMessage.builder().build().builder()
-                        .code(FORBIDDEN_CODE)
-                        .message(FORBIDDEN_MESSAGE)
-                        .build());
+                new ErrorMessage(FORBIDDEN_CODE,FORBIDDEN_MESSAGE));
     }
 }
