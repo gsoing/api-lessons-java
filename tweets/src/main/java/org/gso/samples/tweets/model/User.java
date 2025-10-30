@@ -15,9 +15,6 @@ public class User {
     private String mail;
 
     public UserDto toDto(){
-        return UserDto.builder()
-                .mail(mail)
-                .nickname(nickname)
-                .build();
+        return new UserDto(nickname, mail);
     }
 }

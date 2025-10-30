@@ -47,7 +47,7 @@ public class Tweet {
      * @param created
      * @param modified
      */
-    @PersistenceConstructor
+    @PersistenceCreator
     public Tweet(String id, String text, User user,
                  Source source, LocalDateTime created, LocalDateTime modified) {
         this.id = id;
@@ -59,13 +59,12 @@ public class Tweet {
     }
 
     public TweetDto toDto() {
-        return TweetDto.builder()
-                .id(id)
-                .text(text)
-                .user(user.toDto())
-                .created(RestUtils.convertToZoneDateTime(created))
-                .modified(RestUtils.convertToZoneDateTime(modified))
-                .source(source)
-                .build();
+        return new TweetDto(
+                id,
+                text,
+                source,
+                RestUtils.convertToZoneDateTime(created),
+                RestUtils.convertToZoneDateTime(modified),
+                user.toDto());
     }
 }

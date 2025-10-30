@@ -26,6 +26,8 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.validation.Valid;
+
+import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,22 +48,6 @@ public class TweetsController {
     private QueryConversionPipeline pipeline = QueryConversionPipeline.defaultPipeline();
 
 
-    @RequestMapping(method = {RequestMethod.GET, RequestMethod.HEAD}, path = "/{id}")
-    @ResponseBody
-    public ResponseEntity<TweetDto> getTweet(@PathVariable("id") String tweetId) {
-
-        Tweet tweet = tweetService.getTweet(tweetId);
-
-        TweetDto tweetDto = tweet.toDto();
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .eTag(tweet.getEtag())
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.HOURS))
-                .lastModified(tweetDto.getModified())
-                .body(tweetDto);
-    }
-
     @PostMapping
     @ResponseBody
     public ResponseEntity<TweetDto>
@@ -76,48 +62,11 @@ public class TweetsController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .eTag(createdTweet.getEtag())
-                .lastModified(createdTweetDto.getModified())
+                .lastModified(createdTweetDto.modified())
                 .location(uriComponents.toUri())
                 .body(createdTweetDto);
     }
-
-    @PutMapping("/{id}")
-    @ResponseBody
-    public ResponseEntity<TweetDto>
-    updateTweet(@PathVariable("id") String tweetId, @Valid @RequestBody TweetDto tweetDto) {
-
-        Tweet tweet = tweetDto.toEntity();
-        tweet.setId(tweetId);
-        Tweet updatedTweet = tweetService.updateTweet(tweet);
-
-        TweetDto updatedTweetDto = updatedTweet.toDto();
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .lastModified(updatedTweetDto.getModified())
-                .eTag(updatedTweet.getEtag())
-                .body(updatedTweetDto);
-    }
-
-    @RequestMapping(method = {RequestMethod.GET, RequestMethod.HEAD})
-    @ResponseBody
-    public ResponseEntity<PageData<TweetDto>> getTweets(@RequestParam(required = false) String query,
-                                                        @PageableDefault(page = 0, size = 20) Pageable pageable,
-                                                        UriComponentsBuilder uriComponentsBuilder) {
-
-        Criteria criteria = convertQuery(query);
-
-        Page<Tweet> results = tweetService.getTweets(criteria, pageable);
-        PageData<TweetDto> pageResult = PageData.fromPage(results.map(Tweet::toDto));
-        if (RestUtils.hasNext(results, pageable)) {
-            pageResult.setNext(RestUtils.buildNextUri(uriComponentsBuilder, pageable));
-        }
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .cacheControl(CacheControl.noCache())
-                .body(pageResult);
-    }
+    
 
     /**
      * Convertit une requête RSQL en un objet Criteria compréhensible par la base

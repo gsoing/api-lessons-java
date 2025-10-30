@@ -1,4 +1,4 @@
-FROM gradle:8.10-alpine as compile
+FROM gradle:8.10-alpine AS compile
 
 COPY . .
 RUN gradle clean build --no-daemon
